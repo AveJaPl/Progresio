@@ -1,26 +1,28 @@
 // src/app/myParameters/[id]/page.tsx (Server Component)
 import { PrismaClient } from '@prisma/client';
-import { ProgressDetailsBoolean } from '@/app/components/ProgressDetailsBoolean';
-import { ProgressDetailsFloat } from '@/app/components/ProgressDetailsFloat';
-import { ProgressDetailsInt } from '@/app/components/ProgressDetailsInt';
+import ProgressDetailsBoolean from '@/app/components/ProgressDetailsBoolean';
+import ProgressDetailsFloat from '@/app/components/ProgressDetailsFloat';
+import ProgressDetailsInt from '@/app/components/ProgressDetailsInt';
 
 const prisma = new PrismaClient();
 
-interface Parameter {
+interface Progress {
+  id: number;
+  date: string; // Oczekujemy, że date będzie stringiem
+  value: string;
+  parameterId: number;
+}
+
+interface ParameterWithProgress {
   id: number;
   name: string;
   type: string;
-}
-
-interface ParameterWithProgress extends Parameter {
-  progress: {
-    value: string;
-  }[];
+  progress: Progress[];
 }
 
 export default async function ParameterPage({ params }: { params: { id: string } }) {
   // Pobieramy dane dla konkretnego parametru po stronie serwera
-  const parameter: ParameterWithProgress | null = await prisma.parameter.findUnique({
+  const parameter = await prisma.parameter.findUnique({
     where: { id: Number(params.id) },
     include: { progress: true },
   });
@@ -29,13 +31,22 @@ export default async function ParameterPage({ params }: { params: { id: string }
     return <div>Parameter not found</div>;
   }
 
+  // Konwertujemy daty z typu Date na string (ISO format), jeśli są obiektami Date
+  const parameterWithProgress: ParameterWithProgress = {
+    ...parameter,
+    progress: parameter.progress.map(p => ({
+      ...p,
+      date: p.date instanceof Date ? p.date.toISOString() : p.date, // Konwertujemy do string, jeśli to Date
+    })),
+  };
+
   // Wybieramy odpowiedni komponent na podstawie wartości type
   let ProgressComponent;
-  switch (parameter.type) {
+  switch (parameterWithProgress.type) {
     case 'float':
       ProgressComponent = ProgressDetailsFloat;
       break;
-    case 'integer':
+    case 'int':
       ProgressComponent = ProgressDetailsInt;
       break;
     case 'boolean':
@@ -47,10 +58,10 @@ export default async function ParameterPage({ params }: { params: { id: string }
 
   return (
     <div>
-      <h1>Parameter: {parameter.name}</h1>
-      <p>Type: {parameter.type}</p>
+      <h1>Parameter: {parameterWithProgress.name}</h1>
+      <p>Type: {parameterWithProgress.type}</p>
       {/* Renderowanie odpowiedniego komponentu */}
-      <ProgressComponent progress={parameter.progress} />
+      <ProgressComponent progress={parameterWithProgress.progress} />
     </div>
   );
 }

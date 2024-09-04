@@ -41,7 +41,7 @@ export default function ProgressForm() {
     try {
       for (const parameterId in progress) {
         const value = progress[parameterId];
-        await fetch('/api/parameters', {
+        await fetch('/api/progress', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
