@@ -1,30 +1,21 @@
-// src/app/components/ParameterList.tsx
-"use client"
-import { useEffect, useState } from 'react';
+// src/app/myParameters/page.tsx (Server Component)
+import { PrismaClient } from '@prisma/client';
+import ParameterElement from './ParameterElement';
+const prisma = new PrismaClient();
 
-export default function ParameterList() {
-  const [parameters, setParameters] = useState([]);
-  const [progress, setProgress] = useState({});
+interface Parameter {
+  id: number;
+  name: string;
+  type: string;
+}
 
-  useEffect(() => {
-    const fetchParameters = async () => {
-      const res = await fetch('/api/parameters');
-      const data = await res.json();
-      const {parameters, progress} = data;
-      setParameters(parameters || []);
-      setProgress(progress || {});
-    };
-
-    fetchParameters();
-  }, []);
+export default async function ParameterList() {
+  const parameters: Parameter[] = await prisma.parameter.findMany(); // Pobieranie danych na serwerze
 
   return (
-    <ul className="space-y-4">
-      {parameters.map((param: { id: number; name: string; type: string }) => (
-        <li key={param.id} className="bg-gray-100 p-4 rounded shadow">
-          <span className="font-bold">{param.name}</span> - {param.type}
-        </li>
-      ))}
-    </ul>
+    <div>
+      <h1>Lista parametrów</h1>
+      <ParameterElement parameters={parameters} />
+    </div>
   );
 }
