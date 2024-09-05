@@ -1,4 +1,3 @@
-// src/app/components/ProgressForm.tsx
 "use client";
 
 import { useEffect, useState, ChangeEvent } from 'react';
@@ -61,13 +60,33 @@ export default function ProgressForm() {
       {parameters.map((param) => (
         <div key={param.id} className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
-            {param.name} ({param.type})
+            {param.name}
+          </label>
+          <div>
             {param.type === 'boolean' && (
-              <input
-                type="checkbox"
-                className="ml-2"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange(param.id, e.target.checked)}
-              />
+              <div className="flex items-center space-x-2">
+                {/* Two buttons for Yes/No */}
+                <button
+                  className={`py-2 px-4 font-bold rounded ${
+                    progress[param.id] === true
+                      ? 'bg-green-600 text-white border-2 border-green-800'
+                      : 'bg-green-300 text-green-700 border-2 border-green-500'
+                  }`}
+                  onClick={() => handleInputChange(param.id, true)}
+                >
+                  Yes
+                </button>
+                <button
+                  className={`py-2 px-4 font-bold rounded ${
+                    progress[param.id] === false
+                      ? 'bg-red-600 text-white border-2 border-red-800'
+                      : 'bg-red-300 text-red-700 border-2 border-red-500'
+                  }`}
+                  onClick={() => handleInputChange(param.id, false)}
+                >
+                  No
+                </button>
+              </div>
             )}
             {param.type === 'int' && (
               <input
@@ -84,12 +103,12 @@ export default function ProgressForm() {
                 onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange(param.id, parseFloat(e.target.value))}
               />
             )}
-          </label>
+          </div>
         </div>
       ))}
       <button
         type="button"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
         onClick={handleSubmit}
       >
         Save Progress
