@@ -14,7 +14,6 @@ export default async function ParameterList() {
 
   return (
     <div>
-      <h1>Lista parametrów</h1>
       <ParameterElement parameters={parameters} />
     </div>
   );
