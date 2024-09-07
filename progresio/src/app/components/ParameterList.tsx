@@ -1,7 +1,6 @@
 // src/app/myParameters/page.tsx (Server Component)
-import { PrismaClient } from '@prisma/client';
 import ParameterElement from './ParameterElement';
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 interface Parameter {
   id: number;

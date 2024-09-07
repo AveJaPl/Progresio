@@ -4,29 +4,36 @@
 import { useState } from 'react';
 
 export default function ParameterForm() {
-  const [name, setName] = useState('');
-  const [type, setType] = useState('boolean');
+  const [name, setName] = useState("");
+  const [type, setType] = useState("boolean");
+  const [message, setMessage] = useState<string | null>(null); // Dodanie wiadomości o powodzeniu
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/parameters', {
-      method: 'POST',
+    const res = await fetch("/api/parameters", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ name, type }),
     });
 
     if (res.ok) {
-      setName('');
-      setType('boolean');
-      alert('Parameter added successfully!');
+      // Po pomyślnym dodaniu nowego parametru ustawiamy stan i zapisujemy informację w localStorage
+      setName("");
+      setType("boolean");
+      setMessage("Parameter added successfully!");
+    } else {
+      setMessage("Failed to add parameter.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+    >
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
           Name:
@@ -54,9 +61,13 @@ export default function ParameterForm() {
           </select>
         </label>
       </div>
-      <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      <button
+        type="submit"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
         Add Parameter
       </button>
+      {message && <p className="mt-4 text-green-500">{message}</p>}{" "}
     </form>
   );
 }

@@ -55,17 +55,17 @@ export default function ParameterElement({
       <ul className="space-y-4">
         {parameters.map((param: Parameter) => (
           <div
-            className="flex justify-between items-center w-full bg-gray-100 p-4 rounded shadow hover:bg-gray-200 transition"
+            className="flex justify-between items-center w-full bg-gray-100rounded shadow "
             key={param.id}
           >
             <li
-              className="cursor-pointer flex-1"
+              className="cursor-pointer flex-1 h-full p-4 hover:bg-gray-200 transition"
               onClick={() => handleParameterClick(param.id)}
             >
               <span className="font-bold">{param.name}</span> - {param.type}
             </li>
             <button
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="text-red-500 font-bold p-4 focus:outline-none focus:shadow-outline border-l-2 hover:bg-red-500 hover:text-white transition border-red-500 m-l-4"
               onClick={() => openModal(param.id)} // Otwieranie modala po kliknięciu
             >
               Delete
