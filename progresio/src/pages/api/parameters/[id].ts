@@ -18,7 +18,18 @@ export default async function handler(
         console.log(error);
       res.status(500).json({ error: "Error deleting parameter" });
     }
-  } else {
+  } else if (req.method === "GET") {
+    try {
+      const parameter = await prisma.parameter.findUnique({
+        where: { id },
+        include: { progress: true },
+      });
+      res.status(200).json({ parameter });
+    } catch (error) {
+      res.status(500).json({ error: "Error fetching parameter" });
+    }
+  }
+  else {
     res.status(405).json({ message: "Method Not Allowed" });
   }
 }

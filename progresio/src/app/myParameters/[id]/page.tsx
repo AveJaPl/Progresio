@@ -1,14 +1,14 @@
 // src/app/myParameters/[id]/page.tsx (Server Component)
-import { PrismaClient } from '@prisma/client';
-import ProgressDetailsBoolean from '@/app/components/ProgressDetailsBoolean';
-import ProgressDetailsFloat from '@/app/components/ProgressDetailsFloat';
-import ProgressDetailsInt from '@/app/components/ProgressDetailsInt';
+"use client";
 
-const prisma = new PrismaClient();
+import ProgressDetailsBoolean from "@/app/components/ProgressDetailsBoolean";
+import ProgressDetailsFloat from "@/app/components/ProgressDetailsFloat";
+import ProgressDetailsInt from "@/app/components/ProgressDetailsInt";
+import { useEffect, useState } from "react";
 
 interface Progress {
   id: number;
-  date: string; // Oczekujemy, że date będzie stringiem
+  date: string;
   value: string;
   parameterId: number;
 }
@@ -20,48 +20,66 @@ interface ParameterWithProgress {
   progress: Progress[];
 }
 
-export default async function ParameterPage({ params }: { params: { id: string } }) {
-  // Pobieramy dane dla konkretnego parametru po stronie serwera
-  const parameter = await prisma.parameter.findUnique({
-    where: { id: Number(params.id) },
-    include: { progress: true },
-  });
+export default function ParameterPage({ params }: { params: { id: string } }) {
+  const [parameter, setParameter] = useState<ParameterWithProgress | null>(
+    null
+  );
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!parameter) {
-    return <div>Parameter not found</div>;
+  useEffect(() => {
+    const fetchParameter = async () => {
+      try {
+        const res = await fetch(`/api/parameters/${params.id}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch parameter");
+        }
+        const data = await res.json();
+        setParameter(data.parameter);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParameter();
+  }, [params.id]);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  // Konwertujemy daty z typu Date na string (ISO format), jeśli są obiektami Date
-  const parameterWithProgress: ParameterWithProgress = {
-    ...parameter,
-    progress: parameter.progress.map(p => ({
-      ...p,
-      date: p.date instanceof Date ? p.date.toISOString() : p.date, // Konwertujemy do string, jeśli to Date
-    })),
-  };
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
-  // Wybieramy odpowiedni komponent na podstawie wartości type
+  if (!parameter) {
+    return <div>No parameter found</div>;
+  }
+
+  // Choose the correct component based on the parameter type
   let ProgressComponent;
-  switch (parameterWithProgress.type) {
-    case 'float':
+  switch (parameter.type) {
+    case "float":
       ProgressComponent = ProgressDetailsFloat;
       break;
-    case 'int':
+    case "int":
       ProgressComponent = ProgressDetailsInt;
       break;
-    case 'boolean':
+    case "boolean":
       ProgressComponent = ProgressDetailsBoolean;
       break;
     default:
-      return <div>Unsupported parameter type</div>; // Obsługa nieobsługiwanych typów
+      return <div>Unsupported parameter type</div>; // Handle unsupported types
   }
 
   return (
     <div>
-      <h1>Parameter: {parameterWithProgress.name}</h1>
-      <p>Type: {parameterWithProgress.type}</p>
-      {/* Renderowanie odpowiedniego komponentu */}
-      <ProgressComponent progress={parameterWithProgress.progress} />
+      <h1>Parameter: {parameter.name}</h1>
+      <p>Type: {parameter.type}</p>
+      {/* Render the appropriate component */}
+      <ProgressComponent progress={parameter.progress} />
     </div>
   );
 }
