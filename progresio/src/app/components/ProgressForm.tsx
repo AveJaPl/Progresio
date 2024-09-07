@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, ChangeEvent } from "react";
+import { ConfirmModal } from "./ConfirmModal"; // Zakładam, że ConfirmModal znajduje się w tym samym folderze
 
 // Interfejs dla parametru
 interface Parameter {
@@ -11,13 +12,26 @@ interface Parameter {
 
 // Interfejs dla progresu
 interface Progress {
-  [parameterId: number]: boolean | number;
+  [parameterId: number]: boolean | number | string;
 }
 
 export default function ProgressForm() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
   const [progress, setProgress] = useState<Progress>({});
   const [message, setMessage] = useState<string>("");
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Dodajemy stan do kontrolowania widoczności modala
+
+  // Efekt odpowiedzialny za automatyczne ukrywanie komunikatu po 3 sekundach
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(""); // Usuwanie komunikatu po 3 sekundach
+      }, 3000);
+      
+      return () => clearTimeout(timer); // Czyścimy timer po unmount
+    }
+  }, [message]);
 
   useEffect(() => {
     const fetchParameters = async () => {
@@ -29,14 +43,39 @@ export default function ProgressForm() {
     fetchParameters();
   }, []);
 
-  const handleInputChange = (parameterId: number, value: boolean | number) => {
+  const handleInputChange = (parameterId: number, value: boolean | number | string) => {
     setProgress((prev) => ({
       ...prev,
       [parameterId]: value,
     }));
   };
 
+  // Funkcja do sprawdzania, czy istnieje już wpis dla danej daty
+  const checkExistingEntry = async () => {
+    const res = await fetch(`/api/progress?date=${date}T00:00:00.000Z`);
+    const data = await res.json();
+    return data.exists;
+  };
+
+  // Funkcja do obsługi nadpisania danych
   const handleSubmit = async () => {
+    try {
+      const entryExists = await checkExistingEntry();
+
+      if (entryExists) {
+        setIsModalOpen(true); // Otwórz modal, jeśli dane istnieją
+        return;
+      }
+
+      // Jeśli dane nie istnieją, zapisz je
+      saveProgress();
+    } catch (error) {
+      setMessage("Failed to save progress.");
+    }
+  };
+
+  // Funkcja zapisująca dane
+  const saveProgress = async () => {
     try {
       for (const parameterId in progress) {
         const value = progress[parameterId];
@@ -45,13 +84,30 @@ export default function ProgressForm() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ parameterId: parseInt(parameterId), value }),
+          body: JSON.stringify({ 
+            parameterId: parseInt(parameterId), 
+            value: value,
+            date: `${date}T00:00:00.000Z`
+          }),
         });
       }
+
       setMessage("Progress saved successfully!");
     } catch (error) {
       setMessage("Failed to save progress.");
     }
+  };
+
+  // Funkcja wywoływana, gdy użytkownik potwierdzi nadpisanie
+  const handleOverwrite = () => {
+    setIsModalOpen(false); // Zamknij modal
+    saveProgress(); // Bezpośrednio zapisujemy dane
+  };
+
+  // Funkcja wywoływana, gdy użytkownik anuluje nadpisanie
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Zamknij modal
+    setMessage("No changes were made."); // Opcjonalna wiadomość
   };
 
   return (
@@ -61,6 +117,15 @@ export default function ProgressForm() {
       )}
       {parameters.map((param) => (
         <div key={param.id} className="mb-4">
+          {/* Calendar with date to select */}
+          <input 
+            type="date" 
+            className="shadow appearance-none border rounded w-full py-2 px-3 mb-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setDate(e.target.value);
+            }}
+            value={date}
+          />
           <label className="block text-gray-700 text-sm font-bold mb-2">
             {param.name}
           </label>
@@ -112,6 +177,7 @@ export default function ProgressForm() {
           </div>
         </div>
       ))}
+
       <button
         type="button"
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
@@ -120,6 +186,14 @@ export default function ProgressForm() {
         Save Progress
       </button>
       {message && <p className="mt-4 text-green-500">{message}</p>}
+
+      {/* Modal confirmation for overwrite */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleOverwrite}
+        message="An entry for this date already exists. Do you want to overwrite it?"
+      />
     </div>
   );
 }
