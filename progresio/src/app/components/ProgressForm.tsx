@@ -1,193 +1,271 @@
 "use client";
 
 import { useEffect, useState, ChangeEvent } from "react";
-import { ConfirmModal } from "./ConfirmModal"; // Zakładam, że ConfirmModal znajduje się w tym samym folderze
-
-// Interfejs dla parametru
-interface Parameter {
-  id: number;
-  name: string;
-  type: "boolean" | "int" | "float";
-}
-
-// Interfejs dla progresu
-interface Progress {
-  [parameterId: number]: boolean | number | string;
-}
+import { useRouter } from "next/navigation";
+import { ConfirmModal } from "./ConfirmModal";
+import { Parameter } from "@/types/types"; // Assuming you have a types file
+import { FaSpinner } from "react-icons/fa";
 
 export default function ProgressForm() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
-  const [progress, setProgress] = useState<Progress>({});
+  const [progress, setProgress] = useState<Record<number, boolean | number>>({});
   const [message, setMessage] = useState<string>("");
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Dodajemy stan do kontrolowania widoczności modala
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const router = useRouter();
 
-  // Efekt odpowiedzialny za automatyczne ukrywanie komunikatu po 3 sekundach
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage(""); // Usuwanie komunikatu po 3 sekundach
-      }, 3000);
-      
-      return () => clearTimeout(timer); // Czyścimy timer po unmount
-    }
-  }, [message]);
-
+  // Fetch parameters on component mount
   useEffect(() => {
     const fetchParameters = async () => {
-      const res = await fetch("/api/parameters");
-      const data = await res.json();
-      setParameters(data.parameters || []);
+      try {
+        const res = await fetch("/api/parameters");
+        const data = await res.json();
+        console.log(data);
+        setParameters(data.parameters || []);
+      } catch (error) {
+        setMessage("Failed to load parameters.");
+      }
     };
 
     fetchParameters();
   }, []);
 
-  const handleInputChange = (parameterId: number, value: boolean | number | string) => {
+  const handleInputChange = (
+    parameterId: string,
+    value: boolean | number
+  ) => {
+    console.log("new whole data object: ", {
+      ...progress,
+      [parameterId]: value,
+    })
     setProgress((prev) => ({
       ...prev,
       [parameterId]: value,
     }));
   };
 
-  // Funkcja do sprawdzania, czy istnieje już wpis dla danej daty
+  // Check if an entry for the selected date already exists
   const checkExistingEntry = async () => {
-    const res = await fetch(`/api/progress?date=${date}T00:00:00.000Z`);
-    const data = await res.json();
-    return data.exists;
+    try {
+      const res = await fetch(`/api/progress?date=${date}T00:00:00.000Z`);
+      const data = await res.json();
+      return data.exists;
+    } catch (error) {
+      setMessage("Failed to check existing entries.");
+      return false;
+    }
   };
 
-  // Funkcja do obsługi nadpisania danych
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setErrors([]);
+    setMessage("");
+
+    // Validate that all parameters have values
+    const missingParameters = parameters.filter(
+      (param) => progress[param.id] === undefined || progress[param.id] === null
+    );
+
+    if (missingParameters.length > 0) {
+      setErrors(["Please fill out all fields before submitting."]);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const entryExists = await checkExistingEntry();
 
       if (entryExists) {
-        setIsModalOpen(true); // Otwórz modal, jeśli dane istnieją
+        setIsModalOpen(true); // Open modal if data exists
+        setIsSubmitting(false);
         return;
       }
 
-      // Jeśli dane nie istnieją, zapisz je
-      saveProgress();
+      // Save progress if no existing entry
+      await saveProgress();
     } catch (error) {
       setMessage("Failed to save progress.");
+      setIsSubmitting(false);
     }
   };
 
-  // Funkcja zapisująca dane
+  // Save progress data
   const saveProgress = async () => {
     try {
       for (const parameterId in progress) {
+        console.log("parameterId: ", parameterId)
         const value = progress[parameterId];
         await fetch("/api/progress", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            parameterId: parseInt(parameterId), 
+          body: JSON.stringify({
+            parameterId: parameterId,
             value: value,
-            date: `${date}T00:00:00.000Z`
+            date: `${date}T00:00:00.000Z`,
           }),
+          credentials: "include",
         });
       }
 
       setMessage("Progress saved successfully!");
+      setProgress({});
+      // Optionally redirect to another page or refresh data
+      // router.push("/some-page");
     } catch (error) {
       setMessage("Failed to save progress.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Funkcja wywoływana, gdy użytkownik potwierdzi nadpisanie
-  const handleOverwrite = () => {
-    setIsModalOpen(false); // Zamknij modal
-    saveProgress(); // Bezpośrednio zapisujemy dane
+  const handleOverwrite = async () => {
+    setIsModalOpen(false);
+    setIsSubmitting(true);
+    try {
+      // Overwrite existing progress
+      await saveProgress();
+    } catch (error) {
+      setMessage("Failed to overwrite progress.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Funkcja wywoływana, gdy użytkownik anuluje nadpisanie
   const handleCloseModal = () => {
-    setIsModalOpen(false); // Zamknij modal
-    setMessage("No changes were made."); // Opcjonalna wiadomość
+    setIsModalOpen(false);
+    setMessage("No changes were made.");
+    setIsSubmitting(false);
   };
 
   return (
-    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-lg">
-      {parameters.length === 0 && (
-        <p>No parameters available. Please add some parameters first.</p>
-      )}
-      {parameters.map((param) => (
-        <div key={param.id} className="mb-4">
-          {/* Calendar with date to select */}
-          <input 
-            type="date" 
-            className="shadow appearance-none border rounded w-full py-2 px-3 mb-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setDate(e.target.value);
-            }}
-            value={date}
-          />
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            {param.name}
-          </label>
-          <div>
-            {param.type === "boolean" && (
-              <div className="flex items-center space-x-2">
-                {/* Two buttons for Yes/No */}
-                <button
-                  className={`py-2 px-4 font-bold rounded ${
-                    progress[param.id] === true
-                      ? "bg-green-600 text-white border-2 border-green-800"
-                      : "bg-gray-50 text-green-700 border-2 border-green-500"
-                  }`}
-                  onClick={() => handleInputChange(param.id, true)}
-                >
-                  Yes
-                </button>
-                <button
-                  className={`py-2 px-4 font-bold rounded ${
-                    progress[param.id] === false
-                      ? "bg-red-600 text-white border-2 border-red-800"
-                      : "bg-gray-50 text-red-700 border-2 border-red-500"
-                  }`}
-                  onClick={() => handleInputChange(param.id, false)}
-                >
-                  No
-                </button>
-              </div>
-            )}
-            {param.type === "int" && (
-              <input
-                type="number"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  handleInputChange(param.id, parseInt(e.target.value, 10))
-                }
-              />
-            )}
-            {param.type === "float" && (
-              <input
-                type="number"
-                step="0.01"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  handleInputChange(param.id, parseFloat(e.target.value))
-                }
-              />
-            )}
+    <div className="max-w-xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        Submit Your Progress
+      </h1>
+
+      {parameters.length === 0 ? (
+        <p className="text-center text-gray-600">
+          No parameters available. Please add some parameters first.
+        </p>
+      ) : (
+        <form>
+          <div className="mb-6">
+            <label
+              htmlFor="date"
+              className="block text-gray-700 text-sm font-medium mb-2"
+            >
+              Date:
+            </label>
+            <input
+              id="date"
+              type="date"
+              max={new Date().toISOString().split("T")[0]}
+              className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setDate(e.target.value);
+              }}
+              value={date}
+            />
           </div>
-        </div>
-      ))}
 
-      <button
-        type="button"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-        onClick={handleSubmit}
-      >
-        Save Progress
-      </button>
-      {message && <p className="mt-4 text-green-500">{message}</p>}
+          {parameters.map((param) => (
+            <div key={param.id} className="mb-6">
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                {param.name}
+              </label>
+              <div>
+                {param.type === "boolean" && (
+                  <div className="flex items-center space-x-4">
+                    <button
+                      type="button"
+                      className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                        progress[param.id] === true
+                          ? "bg-green-500 text-white border-green-500"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-green-50"
+                      }`}
+                      onClick={() => handleInputChange(param.id, true)}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                        progress[param.id] === false
+                          ? "bg-red-500 text-white border-red-500"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
+                      }`}
+                      onClick={() => handleInputChange(param.id, false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                )}
+                {(param.type === "int" || param.type === "float") && (
+                  <input
+                    type="number"
+                    step={param.type === "float" ? "0.01" : "1"}
+                    className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleInputChange(
+                        param.id,
+                        param.type === "int"
+                          ? parseInt(e.target.value, 10)
+                          : parseFloat(e.target.value)
+                      )
+                    }
+                    value={progress[param.id] || ""}
+                  />
+                )}
+              </div>
+            </div>
+          ))}
 
-      {/* Modal confirmation for overwrite */}
+          {errors.length > 0 && (
+            <div className="mb-4">
+              {errors.map((error, index) => (
+                <p key={index} className="text-red-500 text-sm">
+                  {error}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            disabled={isSubmitting}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            onClick={handleSubmit}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center">
+                <FaSpinner className="animate-spin mr-2" /> Saving...
+              </span>
+            ) : (
+              "Save Progress"
+            )}
+          </button>
+
+          {message && (
+            <p
+              className={`mt-4 text-center ${
+                message.includes("successfully")
+                  ? "text-green-500"
+                  : "text-red-500"
+              }`}
+            >
+              {message}
+            </p>
+          )}
+        </form>
+      )}
+
+      {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

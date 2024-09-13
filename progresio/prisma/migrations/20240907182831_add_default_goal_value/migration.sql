@@ -3,6 +3,8 @@ CREATE TABLE "Parameter" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "goalValue" TEXT NOT NULL,
+    "goalOperator" TEXT,
 
     CONSTRAINT "Parameter_pkey" PRIMARY KEY ("id")
 );
@@ -17,5 +19,8 @@ CREATE TABLE "Progress" (
     CONSTRAINT "Progress_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Progress_parameterId_date_key" ON "Progress"("parameterId", "date");
+
 -- AddForeignKey
-ALTER TABLE "Progress" ADD CONSTRAINT "Progress_parameterId_fkey" FOREIGN KEY ("parameterId") REFERENCES "Parameter"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Progress" ADD CONSTRAINT "Progress_parameterId_fkey" FOREIGN KEY ("parameterId") REFERENCES "Parameter"("id") ON DELETE CASCADE ON UPDATE CASCADE;

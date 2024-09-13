@@ -1,15 +1,10 @@
 "use client";
 
-// src/app/myParameters/page.tsx (Server Component)
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConfirmModal } from "./ConfirmModal"; // Importujemy nasz modal
-
-interface Parameter {
-  id: number;
-  name: string;
-  type: string;
-}
+import { ConfirmModal } from "./ConfirmModal";
+import { FaPlus, FaTrash } from "react-icons/fa"; // Removed FaEdit
+import { Parameter } from "@/types/types";
 
 export default function ParameterList() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -17,30 +12,61 @@ export default function ParameterList() {
   const [selectedParameterId, setSelectedParameterId] = useState<number | null>(
     null
   );
+  const [paramChanged, setParamChanged] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredParameters, setFilteredParameters] = useState<Parameter[]>([]);
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    // Fetch parameters from API
     const fetchParameters = async () => {
-      const res = await fetch("/api/parameters");
+      
+      const res = await fetch("/api/parameters", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        console.error("Failed to fetch parameters");
+        return;
+      }
       const data = await res.json();
-      setParameters(data.parameters || []);
-      console.log(data);
+      setParameters(data.parameters);
+      setFilteredParameters(data.parameters);
+      setLoading(false);
+      
     };
 
     fetchParameters();
-  }, []);
+    
+  }, [paramChanged]);
+
+  useEffect(() => {
+    // Filter parameters based on search query
+    const filtered = parameters.filter((param) =>
+      param.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredParameters(filtered);
+  }, [searchQuery, parameters]);
 
   const handleParameterClick = (id: number) => {
     router.push(`/myParameters/${id}`);
   };
 
   const handleDeleteParameter = async (id: number) => {
-    const res = await fetch(`/api/parameters/${id}`, {
+    await fetch(`/api/parameters/${id}`, {
       method: "DELETE",
-    }).then((res) => {
-      if (res.ok) {
-        router.refresh();
-      }
-    });
+    })
+      .then((res) => {
+        if (res.ok) {
+          setParamChanged(!paramChanged);
+        } else {
+          throw new Error("Failed to delete parameter");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting parameter:", error);
+      });
   };
 
   const openModal = (id: number) => {
@@ -50,7 +76,7 @@ export default function ParameterList() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedParameterId(null); // Resetowanie wybranego parametru
+    setSelectedParameterId(null);
   };
 
   const confirmDelete = () => {
@@ -60,31 +86,74 @@ export default function ParameterList() {
     closeModal();
   };
 
+  const handleAddParameter = () => {
+    router.push("/addParameter"); // Route to add parameter page
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
-      <ul className="space-y-4">
-        {parameters.map((param: Parameter) => (
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
+          My Parameters
+        </h1>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-600 transition"
+          onClick={handleAddParameter}
+        >
+          <FaPlus className="mr-2" />
+          Add Parameter
+        </button>
+      </div>
+
+      {/* Search */}
+      <div className="flex mb-6">
+        <input
+          type="text"
+          placeholder="Search parameters..."
+          className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* Parameter Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredParameters.map((param: Parameter) => (
           <div
-            className="flex justify-between items-center w-full bg-gray-100rounded shadow "
             key={param.id}
+            className="bg-white p-6 rounded-lg shadow hover:shadow-md transition cursor-pointer"
+            onClick={() => handleParameterClick(param.id)}
           >
-            <li
-              className="cursor-pointer flex-1 h-full p-4 hover:bg-gray-200 transition"
-              onClick={() => handleParameterClick(param.id)}
-            >
-              <span className="font-bold">{param.name}</span> - {param.type}
-            </li>
-            <button
-              className="text-red-500 font-bold p-4 focus:outline-none focus:shadow-outline border-l-2 hover:bg-red-500 hover:text-white transition border-red-500 m-l-4"
-              onClick={() => openModal(param.id)} // Otwieranie modala po kliknięciu
-            >
-              Delete
-            </button>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {param.name}
+              </h2>
+              <span className="text-sm text-gray-600 capitalize">
+                {param.type}
+              </span>
+            </div>
+            {/* Add any additional parameter info here */}
+            <div className="mt-4 flex justify-end">
+              <button
+                className="text-red-500 hover:text-red-700 flex items-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openModal(param.id);
+                }}
+              >
+                <FaTrash className="mr-1" /> Delete
+              </button>
+            </div>
           </div>
         ))}
-      </ul>
+      </div>
 
-      {/* Modal do potwierdzenia usunięcia */}
+      {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={isModalOpen}
         onClose={closeModal}

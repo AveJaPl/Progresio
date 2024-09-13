@@ -1,29 +1,65 @@
-// src/app/components/Navigation.tsx
 "use client";
 
-import Link from 'next/link';
+import Link from "next/link";
+import { useState } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 export default function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/addParameter", label: "Add Parameter" },
+    { href: "/myParameters", label: "My Parameters" },
+  ];
+
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <h1 className="text-2xl font-bold">Progresio</h1>
-      <ul className="flex space-x-4">
-        <li>
-          <Link href="/" className="hover:underline px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-700 transition-colors duration-200">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link href="/addParameter" className="hover:underline px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-700 transition-colors duration-200">
-            Add Parameter
-          </Link>
-        </li>
-        <li>
-          <Link href="/myParameters" className="hover:underline px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-700 transition-colors duration-200">
-            My Parameters
-          </Link>
-        </li>
-      </ul>
+    <nav className="bg-blue-600 text-white p-4">
+      <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
+        {/* Logo and Title */}
+        <Link href="/" className="flex items-center">
+          {/* Replace with your logo */}
+          {/* <img src="/logo.svg" alt="Progresio Logo" className="h-8 w-8 mr-2" /> */}
+          <span className="text-2xl font-bold">Progresio</span>
+        </Link>
+
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex space-x-6">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} className="hover:text-gray-200 transition-colors duration-200">
+                  {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* Mobile Menu Toggle */}
+        <button
+          className="md:hidden text-white focus:outline-none"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <ul className="md:hidden mt-4 space-y-4">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href}>
+                <a
+                  className="block text-white hover:text-gray-200 transition-colors duration-200"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.label}
+                </a>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </nav>
   );
 }
