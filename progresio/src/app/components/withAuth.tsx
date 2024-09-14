@@ -19,6 +19,6 @@ export default function withAuth<T>(WrappedComponent: React.ComponentType<T>) {
       return null; // Or a loading indicator
     }
 
-    return <WrappedComponent {...props} />;
+    return <WrappedComponent {...props as any} />;
   };
 }

@@ -20,7 +20,6 @@ const ProgressCalendar: React.FC<ProgressCalendarProps> = ({
     view: string;
   }): string => {
     if (view === "month") {
-      // Adjust date to local time zone
       const dateObj = new Date(date);
       dateObj.setHours(0, 0, 0, 0);
       const year = dateObj.getFullYear();
@@ -45,7 +44,6 @@ const ProgressCalendar: React.FC<ProgressCalendarProps> = ({
     view: string;
   }): JSX.Element | null => {
     if (view === "month") {
-      // Adjust date to local time zone
       const dateObj = new Date(date);
       dateObj.setHours(0, 0, 0, 0);
       const year = dateObj.getFullYear();
@@ -84,25 +82,35 @@ const ProgressCalendar: React.FC<ProgressCalendarProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg">
-      <h3 className="text-xl font-semibold text-gray-700 mb-4">
-        Progress Calendar
+    <div className="bg-white p-6 shadow-lg rounded-lg">
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+        {parameter.name} Progress Calendar
       </h3>
       <Calendar
         tileClassName={tileClassName}
         tileContent={tileContent}
         view="month"
-        className="mx-auto"
+        className="mx-auto border border-gray-200 rounded-lg"
       />
-      {/* Additional styles for calendar and tooltips */}
+      {/* Enhanced styles for calendar and tooltips */}
       <style jsx global>{`
         .react-calendar__tile--success {
-          background-color: #10b981;
+          background-color: #34d399;
           color: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 128, 0, 0.2);
+          transition: transform 0.3s;
         }
         .react-calendar__tile--failure {
-          background-color: #ef4444;
+          background-color: #f87171;
           color: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(128, 0, 0, 0.2);
+          transition: transform 0.3s;
+        }
+        .react-calendar__tile--success:hover,
+        .react-calendar__tile--failure:hover {
+          transform: scale(1.05);
         }
         .tooltip {
           position: relative;
@@ -110,19 +118,20 @@ const ProgressCalendar: React.FC<ProgressCalendarProps> = ({
         }
         .tooltip .tooltiptext {
           visibility: hidden;
-          width: 120px;
+          width: 140px;
           background-color: rgba(0, 0, 0, 0.75);
           color: #fff;
           text-align: center;
-          border-radius: 4px;
-          padding: 5px;
+          border-radius: 6px;
+          padding: 8px;
           position: absolute;
           z-index: 1;
-          bottom: 125%; /* Adjust as needed */
+          bottom: 150%; /* Adjusted for better visibility */
           left: 50%;
           transform: translateX(-50%);
           opacity: 0;
-          transition: opacity 0.3s;
+          transition: opacity 0.3s ease-in-out;
+          font-size: 14px;
         }
         .tooltip:hover .tooltiptext {
           visibility: visible;

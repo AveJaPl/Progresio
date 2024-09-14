@@ -9,7 +9,7 @@ import { Parameter } from "@/types/types";
 export default function ParameterList() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedParameterId, setSelectedParameterId] = useState<number | null>(
+  const [selectedParameterId, setSelectedParameterId] = useState<string | null>(
     null
   );
   const [paramChanged, setParamChanged] = useState(false);
@@ -49,11 +49,11 @@ export default function ParameterList() {
     setFilteredParameters(filtered);
   }, [searchQuery, parameters]);
 
-  const handleParameterClick = (id: number) => {
+  const handleParameterClick = (id: string) => {
     router.push(`/myParameters/${id}`);
   };
 
-  const handleDeleteParameter = async (id: number) => {
+  const handleDeleteParameter = async (id: string) => {
     await fetch(`/api/parameters/${id}`, {
       method: "DELETE",
     })
@@ -69,7 +69,7 @@ export default function ParameterList() {
       });
   };
 
-  const openModal = (id: number) => {
+  const openModal = (id: string) => {
     setSelectedParameterId(id);
     setIsModalOpen(true);
   };

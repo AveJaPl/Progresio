@@ -51,14 +51,14 @@ const StatsCards: React.FC<StatsCardsProps> = ({
             {summary.successRate}%
           </p>
         </div>
-        {summary.averageValue !== null && (
+        {/* {summary.averageValue !== null && (
           <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center">
             <p className="text-gray-600 text-sm">Average Value</p>
             <p className="text-2xl font-bold text-teal-500">
               {summary.averageValue}
             </p>
           </div>
-        )}
+        )} */}
         <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center">
           <p className="text-gray-600 text-sm">Longest Streak</p>
           <p className="text-2xl font-bold text-blue-500">
@@ -75,20 +75,20 @@ const StatsCards: React.FC<StatsCardsProps> = ({
         {goalOperator !== "=" &&
           weeklyStats.currentWeekComparison !== "No weekly data" && (
             <>
-              <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center text-center">
+              {/* <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center text-center">
                 <p className="text-gray-600 text-sm">Average per Week</p>
                 <p className="text-2xl font-bold text-orange-500">
                   {weeklyStats.averagePerWeek}
                 </p>
-              </div>
-              <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center text-center col-span-2 lg:col-span-1">
+              </div> */}
+              {/* <div className="bg-white shadow rounded-lg p-4 flex flex-col items-center text-center col-span-2 lg:col-span-1">
                 <p className="text-gray-600 text-sm">
                   Comparison with Previous Week
                 </p>
                 <p className="text-lg font-bold text-pink-500">
                   {weeklyStats.currentWeekComparison}
                 </p>
-              </div>
+              </div> */}
             </>
           )}
       </div>

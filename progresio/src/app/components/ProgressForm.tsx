@@ -8,24 +8,24 @@ import { FaSpinner } from "react-icons/fa";
 
 export default function ProgressForm() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
-  const [progress, setProgress] = useState<Record<number, boolean | number>>({});
+  const [progress, setProgress] = useState<Record<string, boolean | number>>({});
   const [message, setMessage] = useState<string>("");
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
 
-  // Fetch parameters on component mount
   useEffect(() => {
     const fetchParameters = async () => {
       try {
         const res = await fetch("/api/parameters");
         const data = await res.json();
-        console.log(data);
-        setParameters(data.parameters || []);
+        if (data && Array.isArray(data.parameters)) {
+          setParameters(data.parameters || []);
+        } else {
+          throw new Error("Invalid data format");
+        }
       } catch (error) {
         setMessage("Failed to load parameters.");
       }
@@ -34,21 +34,13 @@ export default function ProgressForm() {
     fetchParameters();
   }, []);
 
-  const handleInputChange = (
-    parameterId: string,
-    value: boolean | number
-  ) => {
-    console.log("new whole data object: ", {
-      ...progress,
-      [parameterId]: value,
-    })
+  const handleInputChange = (parameterId: string, value: boolean | number) => {
     setProgress((prev) => ({
       ...prev,
       [parameterId]: value,
     }));
   };
 
-  // Check if an entry for the selected date already exists
   const checkExistingEntry = async () => {
     try {
       const res = await fetch(`/api/progress?date=${date}T00:00:00.000Z`);
@@ -65,7 +57,6 @@ export default function ProgressForm() {
     setErrors([]);
     setMessage("");
 
-    // Validate that all parameters have values
     const missingParameters = parameters.filter(
       (param) => progress[param.id] === undefined || progress[param.id] === null
     );
@@ -80,12 +71,11 @@ export default function ProgressForm() {
       const entryExists = await checkExistingEntry();
 
       if (entryExists) {
-        setIsModalOpen(true); // Open modal if data exists
+        setIsModalOpen(true);
         setIsSubmitting(false);
         return;
       }
 
-      // Save progress if no existing entry
       await saveProgress();
     } catch (error) {
       setMessage("Failed to save progress.");
@@ -93,11 +83,9 @@ export default function ProgressForm() {
     }
   };
 
-  // Save progress data
   const saveProgress = async () => {
     try {
       for (const parameterId in progress) {
-        console.log("parameterId: ", parameterId)
         const value = progress[parameterId];
         await fetch("/api/progress", {
           method: "POST",
@@ -115,8 +103,6 @@ export default function ProgressForm() {
 
       setMessage("Progress saved successfully!");
       setProgress({});
-      // Optionally redirect to another page or refresh data
-      // router.push("/some-page");
     } catch (error) {
       setMessage("Failed to save progress.");
     } finally {
@@ -128,7 +114,6 @@ export default function ProgressForm() {
     setIsModalOpen(false);
     setIsSubmitting(true);
     try {
-      // Overwrite existing progress
       await saveProgress();
     } catch (error) {
       setMessage("Failed to overwrite progress.");
@@ -144,7 +129,9 @@ export default function ProgressForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+    <div
+      className="max-w-4xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg max-h-[60vh] overflow-y-auto"
+    >
       <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Submit Your Progress
       </h1>
@@ -154,77 +141,81 @@ export default function ProgressForm() {
           No parameters available. Please add some parameters first.
         </p>
       ) : (
-        <form>
-          <div className="mb-6">
-            <label
-              htmlFor="date"
-              className="block text-gray-700 text-sm font-medium mb-2"
-            >
-              Date:
-            </label>
-            <input
-              id="date"
-              type="date"
-              max={new Date().toISOString().split("T")[0]}
-              className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setDate(e.target.value);
-              }}
-              value={date}
-            />
+        <form className="flex flex-col space-y-6">
+          <div className="flex space-x-4 mb-6">
+            <div className="flex-1">
+              <label
+                htmlFor="date"
+                className="block text-gray-700 text-sm font-medium mb-2"
+              >
+                Date:
+              </label>
+              <input
+                id="date"
+                type="date"
+                max={new Date().toISOString().split("T")[0]}
+                className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setDate(e.target.value);
+                }}
+                value={date}
+              />
+            </div>
           </div>
 
-          {parameters.map((param) => (
-            <div key={param.id} className="mb-6">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                {param.name}
-              </label>
-              <div>
-                {param.type === "boolean" && (
-                  <div className="flex items-center space-x-4">
-                    <button
-                      type="button"
-                      className={`w-full py-2 px-4 font-semibold rounded-md border ${
-                        progress[param.id] === true
-                          ? "bg-green-500 text-white border-green-500"
-                          : "bg-white text-gray-700 border-gray-300 hover:bg-green-50"
-                      }`}
-                      onClick={() => handleInputChange(param.id, true)}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      className={`w-full py-2 px-4 font-semibold rounded-md border ${
-                        progress[param.id] === false
-                          ? "bg-red-500 text-white border-red-500"
-                          : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
-                      }`}
-                      onClick={() => handleInputChange(param.id, false)}
-                    >
-                      No
-                    </button>
-                  </div>
-                )}
-                {(param.type === "int" || param.type === "float") && (
-                  <input
-                    type="number"
-                    step={param.type === "float" ? "0.01" : "1"}
-                    className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleInputChange(
-                        param.id,
-                        param.type === "int"
-                          ? parseInt(e.target.value, 10)
-                          : parseFloat(e.target.value)
-                      )
-                    }
-                    value={progress[param.id] || ""}
-                  />
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {parameters.map((param) => (
+              <div key={param.id} className="mb-6">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  {param.name}
+                </label>
+                <div>
+                  {param.type === "boolean" && (
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                          progress[param.id] === true
+                            ? "bg-green-500 text-white border-green-500"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-green-50"
+                        }`}
+                        onClick={() => handleInputChange(param.id, true)}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        type="button"
+                        className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                          progress[param.id] === false
+                            ? "bg-red-500 text-white border-red-500"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
+                        }`}
+                        onClick={() => handleInputChange(param.id, false)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  )}
+                  {(param.type === "int" || param.type === "float") && (
+                    <input
+                      type="number"
+                      step={param.type === "float" ? "0.01" : "1"}
+                      className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        handleInputChange(
+                          param.id,
+                          param.type === "int"
+                            ? parseInt(e.target.value, 10)
+                            : parseFloat(e.target.value)
+                        )
+                      }
+                      value={progress[param.id] as number}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
           {errors.length > 0 && (
             <div className="mb-4">
@@ -265,7 +256,6 @@ export default function ProgressForm() {
         </form>
       )}
 
-      {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

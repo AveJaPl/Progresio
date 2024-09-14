@@ -10,7 +10,7 @@ function AddParameterPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState<"boolean" | "int" | "float">("boolean");
   const [goalOperator, setGoalOperator] = useState("=");
-  const [goalValue, setGoalValue] = useState<number | boolean | "">("");
+  const [goalValue, setGoalValue] = useState<number | boolean | "">(false);
   const [message, setMessage] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);

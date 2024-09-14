@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
 
   const navLinks = [
     { href: "/addParameter", label: "Add Parameter" },
@@ -26,11 +28,23 @@ export default function Navigation() {
         <ul className="hidden md:flex space-x-6">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <Link href={link.href} className="hover:text-gray-200 transition-colors duration-200">
-                  {link.label}
+              <Link
+                href={link.href}
+                className="hover:text-gray-200 transition-colors duration-200"
+              >
+                {link.label}
               </Link>
             </li>
           ))}
+          <li>
+            <Link
+              href={"/"}
+              className="hover:text-gray-200 transition-colors duration-200"
+              onClick={() => logout()}
+            >
+              Logout
+            </Link>
+          </li>
         </ul>
 
         {/* Mobile Menu Toggle */}
@@ -58,6 +72,15 @@ export default function Navigation() {
               </Link>
             </li>
           ))}
+          <li>
+            <Link
+              href={"/"}
+              className="block text-white hover:text-gray-200 transition-colors duration-200"
+              onClick={() => logout()}
+            >
+              Logout
+            </Link>
+          </li>
         </ul>
       )}
     </nav>
