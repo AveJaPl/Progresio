@@ -3,7 +3,9 @@ import { prisma } from "@/app/lib/prisma"; // Global Prisma instance
 import { authenticate } from "@/app/utils/authenticate";
 
 export async function POST(request: NextRequest) {
+  console.log("Request to /api/me");
   const decoded = authenticate(request);
+  console.log("Decoded token:", decoded);
   if (!decoded) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   } 

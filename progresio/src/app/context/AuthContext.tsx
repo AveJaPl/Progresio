@@ -24,17 +24,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       credentials: "include",
     })
       .then((res) => {
+        console.log("Response from /api/me:", res);
         if (res.ok) {
           setAuthenticated(true);
         } else {
           setAuthenticated(false);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Error fetching /api/me:", error);
         setAuthenticated(false);
       });
-  }),
-    [];
+  }, []); // Prawidłowe zamknięcie useEffect
 
   const logout = async () => {
     await fetch("/api/logout", {
