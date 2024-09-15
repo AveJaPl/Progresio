@@ -78,7 +78,7 @@ export default function AuthForm() {
           onClick={toggleForm}
           className="text-blue-500 hover:underline focus:outline-none"
         >
-          {loading ? "Loading..." : isLogin ? "Login" : "Register"}
+          {loading ? "Loading..." : isLogin ? "Register" : "Login"}
         </button>
       </p>
     </div>
