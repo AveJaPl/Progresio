@@ -7,50 +7,42 @@ export async function POST(request: NextRequest) {
   if (!decoded) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+  const data = await request.json();
+  const { progressEntries, date } = data
 
-  const { parameterId, value, date } = await request.json();
-
-  console.log(parameterId, value, date);
-  
-  if (!parameterId || value === undefined || !date) {
+  if (!progressEntries || !Array.isArray(progressEntries) || !date) {
     return NextResponse.json({ message: "Invalid data" }, { status: 400 });
   }
 
   try {
-    // Convert date to Date object
     const parsedDate = new Date(date);
 
-    // Check if the progress entry already exists
-    const existingProgress = await prisma.progress.findFirst({
-      where: {
-        parameterId,
-        date: parsedDate,
-      },
-    });
-
-    let progress;
-
-    if (existingProgress) {
-      // Update the existing progress
-      progress = await prisma.progress.update({
-        where: { id: existingProgress.id },
-        data: {
-          value: String(value),
+    // Tworzymy operacje upsert dla każdej pozycji w progressEntries
+    const operations = progressEntries.map(({ parameterId, value }) => {
+      return prisma.progress.upsert({
+        where: {
+          parameterId_date_userId_unique: {
+            parameterId,
+            date: parsedDate,
+            userId: decoded.userId,
+          },
         },
-      });
-    } else {
-      // Create a new progress entry
-      progress = await prisma.progress.create({
-        data: {
+        update: {
+          value: String(value), // Aktualizacja istniejącego wpisu
+        },
+        create: {
           parameterId,
           value: String(value),
           date: parsedDate,
-          userId: decoded.userId, // Associate progress with the user
+          userId: decoded.userId, // Tworzenie nowego wpisu
         },
       });
-    }
+    });
 
-    return NextResponse.json(progress, { status: 201 });
+    // Wykonujemy wszystkie operacje w ramach jednej transakcji
+    const results = await prisma.$transaction(operations);
+
+    return NextResponse.json(results, { status: 201 });
   } catch (error) {
     console.error("Error saving progress:", error);
     return NextResponse.json(
@@ -59,6 +51,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 export async function GET(request: NextRequest) {
   const decoded = authenticate(request);
   if (!decoded) {

@@ -89,24 +89,31 @@ export default function ProgressForm() {
 
   const saveProgress = async () => {
     try {
-      for (const parameterId in progress) {
-        const value = progress[parameterId];
-        await fetch("/api/progress", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            parameterId: parameterId,
-            value: value,
-            date: `${date}T00:00:00.000Z`,
-          }),
-          credentials: "include",
-        });
-      }
+      // Tworzymy tablicę z postacią każdego parametru
+      const progressEntries = Object.keys(progress).map((parameterId) => ({
+        parameterId: parameterId,
+        value: progress[parameterId],
+      }));
 
-      setMessage("Progress saved successfully!");
-      setProgress({});
+      // Wysyłamy jedno zapytanie z listą parametrów
+      const response = await fetch("/api/progress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          progressEntries: progressEntries, // Przekazujemy całą listę
+          date: `${date}T00:00:00.000Z`,
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setMessage("Progress saved successfully!");
+        // setProgress({});
+      } else {
+        setMessage("Failed to save progress.");
+      }
     } catch (error) {
       setMessage("Failed to save progress.");
     } finally {

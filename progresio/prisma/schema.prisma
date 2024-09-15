@@ -35,5 +35,5 @@ model Progress {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   parameter   Parameter @relation(fields: [parameterId], references: [id], onDelete: Cascade)
 
-  @@unique([parameterId, date], name: "parameterId_date_unique")
+  @@unique([parameterId, date, userId], name: "parameterId_date_userId_unique")
 }
