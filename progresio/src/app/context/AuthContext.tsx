@@ -7,18 +7,22 @@ interface AuthContextType {
   isAuthenticated: boolean;
   setAuthenticated: (value: boolean) => void;
   logout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   setAuthenticated: () => {},
   logout: () => {},
+  loading: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch("/api/me", {
       method: "POST",
       credentials: "include",
@@ -30,10 +34,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setAuthenticated(false);
         }
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching /api/me:", error);
         setAuthenticated(false);
+        setLoading(false);
       });
   }, []); // Prawidłowe zamknięcie useEffect
 
@@ -46,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setAuthenticated, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, setAuthenticated, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
