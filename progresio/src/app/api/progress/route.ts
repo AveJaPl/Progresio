@@ -94,3 +94,33 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+
+export async function DELETE(request: NextRequest) {
+  const decoded = authenticate(request);
+  if (!decoded) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const id = (await request.json()).id
+
+  if (!id) {
+    return NextResponse.json({ message: "ID parameter is required" }, { status: 400 });
+  }
+
+  try {
+    await prisma.progress.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting progress:", error);
+    return NextResponse.json(
+      { error: "Error deleting progress" },
+      { status: 500 }
+    );
+  }
+}

@@ -252,23 +252,18 @@ export default function ProgressComponent({ parameter }: ProgressDetailsProps) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-        {/* Left Column */}
-        <div className="xl:col-span-2">
-          {/* Stats Cards */}
-          <StatsCards
-            summary={summary}
-            streak={streak}
-            weeklyStats={weeklyStats}
-            goalOperator={parameter.goalOperator}
-          />
+      <div className="grid grid-cols-1 gap-8">
+        {/* Stats Cards */}
+        <StatsCards
+          summary={summary}
+          streak={streak}
+          weeklyStats={weeklyStats}
+          goalOperator={parameter.goalOperator}
+        />
 
-          {/* Progress Calendar */}
-          <ProgressCalendar parameter={parameter} calendarData={calendarData} />
-        </div>
-
-        {/* Right Column */}
-        <div>
+        {/* Progress Calendar */}
+        {/* <ProgressCalendar parameter={parameter} calendarData={calendarData} /> */}
+        <div className="xl:col-span-1">
           {/* Progress Table */}
           <ProgressTable parameter={parameter} calendarData={calendarData} />
         </div>
