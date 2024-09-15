@@ -41,6 +41,9 @@ export default function AuthForm() {
 
   return (
     <div className="max-w-md w-full p-6 bg-white rounded shadow-md">
+      <h1 className="text-2xl font-bold text-center pb-6">
+        {isLogin ? 'Login' : 'Register'}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"

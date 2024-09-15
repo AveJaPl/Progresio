@@ -10,6 +10,7 @@ export default function Navigation() {
   const { logout } = useAuth();
 
   const navLinks = [
+    { href: "/progress", label: "Submit Progress" },
     { href: "/addParameter", label: "Add Parameter" },
     { href: "/myParameters", label: "My Parameters" },
   ];
@@ -36,7 +37,7 @@ export default function Navigation() {
               </Link>
             </li>
           ))}
-          <li>
+          {/* <li>
             <Link
               href={"/"}
               className="hover:text-gray-200 transition-colors duration-200"
@@ -44,7 +45,7 @@ export default function Navigation() {
             >
               Logout
             </Link>
-          </li>
+          </li> */}
         </ul>
 
         {/* Mobile Menu Toggle */}
@@ -72,7 +73,7 @@ export default function Navigation() {
               </Link>
             </li>
           ))}
-          <li>
+          {/* <li>
             <Link
               href={"/"}
               className="block text-white hover:text-gray-200 transition-colors duration-200"
@@ -80,7 +81,7 @@ export default function Navigation() {
             >
               Logout
             </Link>
-          </li>
+          </li> */}
         </ul>
       )}
     </nav>
