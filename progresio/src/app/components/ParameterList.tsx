@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmModal } from "./ConfirmModal";
 import { FaPlus, FaTrash } from "react-icons/fa"; // Removed FaEdit
 import { Parameter } from "@/types/types";
+import Loading from "../loading";
 
 export default function ParameterList() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -91,7 +92,7 @@ export default function ParameterList() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading/>;
   }
 
   return (

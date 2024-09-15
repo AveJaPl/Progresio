@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import withAuth from "@/app/components/withAuth";
 import { Parameter } from "@/types/types";
+import Loading from "../../loading";
 
 function ParameterPage({ params }: { params: { id: string } }) {
   const [parameter, setParameter] = useState<Parameter | null>(null);
@@ -35,7 +36,7 @@ function ParameterPage({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
