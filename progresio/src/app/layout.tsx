@@ -4,6 +4,7 @@ import Navigation from "./components/Navigation";
 import { AuthProvider } from "./context/AuthContext";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({
   children,
@@ -31,7 +32,17 @@ export default function RootLayout({
                 AveJaPl
               </a>
             </p>
-            <ToastContainer />
+            <ToastContainer
+              position="bottom-right"
+              autoClose={3000}
+              hideProgressBar
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
           </footer>
         </AuthProvider>
       </body>

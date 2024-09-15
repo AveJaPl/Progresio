@@ -90,14 +90,14 @@ export default function Navigation() {
                 </li>
               ))}
               <li>
-                <Link
+            <Link
                   href={""}
                   className="bg-red-500 hover:bg-red-600 hover:text-gray-200 transition-colors duration-200"
                   onClick={() => setIsModalOpen(true)}
                 >
                   Logout
                 </Link>
-              </li>
+          </li>
             </ul>
           )}
         </>
