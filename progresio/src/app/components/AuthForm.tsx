@@ -68,7 +68,7 @@ export default function AuthForm() {
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
         >
-          {isLogin ? "Login" : "Register"}
+          {loading ? "Loading..." : isLogin ? "Login" : "Register"}
         </button>
       </form>
       <p className="mt-4 text-center">
@@ -78,7 +78,7 @@ export default function AuthForm() {
           onClick={toggleForm}
           className="text-blue-500 hover:underline focus:outline-none"
         >
-          {loading ? "Loading..." : isLogin ? "Register" : "Login"}
+          {isLogin ? "Register" : "Login"}
         </button>
       </p>
     </div>
