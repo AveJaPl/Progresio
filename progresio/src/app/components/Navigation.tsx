@@ -11,7 +11,7 @@ export default function Navigation() {
 
   const navLinks = [
     { href: "/progress", label: "Submit Progress" },
-    { href: "/addParameter", label: "Add Parameter" },
+    // { href: "/addParameter", label: "Add Parameter" },
     { href: "/myParameters", label: "My Parameters" },
   ];
 
