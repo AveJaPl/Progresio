@@ -8,9 +8,13 @@ import { FaSpinner } from "react-icons/fa";
 
 export default function ProgressForm() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
-  const [progress, setProgress] = useState<Record<string, boolean | number>>({});
+  const [progress, setProgress] = useState<Record<string, boolean | number>>(
+    {}
+  );
   const [message, setMessage] = useState<string>("");
-  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -129,139 +133,141 @@ export default function ProgressForm() {
   };
 
   return (
-    <div
-      className="max-w-4xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg max-h-[60vh] overflow-y-auto"
-    >
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Submit Your Progress
-      </h1>
+    <>
+      <h1 className="text-4xl font-bold mb-8">Track Today&apos;s Progress</h1>
 
-      {parameters.length === 0 ? (
-        <p className="text-center text-gray-600">
-          No parameters available. Please add some parameters first.
-        </p>
-      ) : (
-        <form className="flex flex-col space-y-6">
-          <div className="flex space-x-4 mb-6">
-            <div className="flex-1">
-              <label
-                htmlFor="date"
-                className="block text-gray-700 text-sm font-medium mb-2"
-              >
-                Date:
-              </label>
-              <input
-                id="date"
-                type="date"
-                max={new Date().toISOString().split("T")[0]}
-                className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setDate(e.target.value);
-                }}
-                value={date}
-              />
-            </div>
-          </div>
+      <div className="max-w-4xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg max-h-[60vh] overflow-y-auto">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Submit Your Progress
+        </h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {parameters.map((param) => (
-              <div key={param.id} className="mb-6">
-                <label className="block text-gray-700 text-sm font-medium mb-2">
-                  {param.name}
+        {parameters.length === 0 ? (
+          <p className="text-center text-gray-600">
+            No parameters available. Please add some parameters first.
+          </p>
+        ) : (
+          <form className="flex flex-col space-y-6">
+            <div className="flex space-x-4 mb-6">
+              <div className="flex-1">
+                <label
+                  htmlFor="date"
+                  className="block text-gray-700 text-sm font-medium mb-2"
+                >
+                  Date:
                 </label>
-                <div>
-                  {param.type === "boolean" && (
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        className={`w-full py-2 px-4 font-semibold rounded-md border ${
-                          progress[param.id] === true
-                            ? "bg-green-500 text-white border-green-500"
-                            : "bg-white text-gray-700 border-gray-300 hover:bg-green-50"
-                        }`}
-                        onClick={() => handleInputChange(param.id, true)}
-                      >
-                        Yes
-                      </button>
-                      <button
-                        type="button"
-                        className={`w-full py-2 px-4 font-semibold rounded-md border ${
-                          progress[param.id] === false
-                            ? "bg-red-500 text-white border-red-500"
-                            : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
-                        }`}
-                        onClick={() => handleInputChange(param.id, false)}
-                      >
-                        No
-                      </button>
-                    </div>
-                  )}
-                  {(param.type === "int" || param.type === "float") && (
-                    <input
-                      type="number"
-                      step={param.type === "float" ? "0.01" : "1"}
-                      className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        handleInputChange(
-                          param.id,
-                          param.type === "int"
-                            ? parseInt(e.target.value, 10)
-                            : parseFloat(e.target.value)
-                        )
-                      }
-                      value={progress[param.id] as number}
-                    />
-                  )}
-                </div>
+                <input
+                  id="date"
+                  type="date"
+                  max={new Date().toISOString().split("T")[0]}
+                  className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setDate(e.target.value);
+                  }}
+                  value={date}
+                />
               </div>
-            ))}
-          </div>
+            </div>
 
-          {errors.length > 0 && (
-            <div className="mb-4">
-              {errors.map((error, index) => (
-                <p key={index} className="text-red-500 text-sm">
-                  {error}
-                </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {parameters.map((param) => (
+                <div key={param.id} className="mb-6">
+                  <label className="block text-gray-700 text-sm font-medium mb-2">
+                    {param.name}
+                  </label>
+                  <div>
+                    {param.type === "boolean" && (
+                      <div className="flex space-x-4">
+                        <button
+                          type="button"
+                          className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                            progress[param.id] === true
+                              ? "bg-green-500 text-white border-green-500"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-green-50"
+                          }`}
+                          onClick={() => handleInputChange(param.id, true)}
+                        >
+                          Yes
+                        </button>
+                        <button
+                          type="button"
+                          className={`w-full py-2 px-4 font-semibold rounded-md border ${
+                            progress[param.id] === false
+                              ? "bg-red-500 text-white border-red-500"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
+                          }`}
+                          onClick={() => handleInputChange(param.id, false)}
+                        >
+                          No
+                        </button>
+                      </div>
+                    )}
+                    {(param.type === "int" || param.type === "float") && (
+                      <input
+                        type="number"
+                        step={param.type === "float" ? "0.01" : "1"}
+                        className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          handleInputChange(
+                            param.id,
+                            param.type === "int"
+                              ? parseInt(e.target.value, 10)
+                              : parseFloat(e.target.value)
+                          )
+                        }
+                        value={progress[param.id] as number}
+                      />
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
-          )}
 
-          <button
-            type="button"
-            disabled={isSubmitting}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            onClick={handleSubmit}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center">
-                <FaSpinner className="animate-spin mr-2" /> Saving...
-              </span>
-            ) : (
-              "Save Progress"
+            {errors.length > 0 && (
+              <div className="mb-4">
+                {errors.map((error, index) => (
+                  <p key={index} className="text-red-500 text-sm">
+                    {error}
+                  </p>
+                ))}
+              </div>
             )}
-          </button>
 
-          {message && (
-            <p
-              className={`mt-4 text-center ${
-                message.includes("successfully")
-                  ? "text-green-500"
-                  : "text-red-500"
-              }`}
+            <button
+              type="button"
+              disabled={isSubmitting}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              onClick={handleSubmit}
             >
-              {message}
-            </p>
-          )}
-        </form>
-      )}
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <FaSpinner className="animate-spin mr-2" /> Saving...
+                </span>
+              ) : (
+                "Save Progress"
+              )}
+            </button>
 
-      <ConfirmModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleOverwrite}
-        message="An entry for this date already exists. Do you want to overwrite it?"
-      />
-    </div>
+            {message && (
+              <p
+                className={`mt-4 text-center ${
+                  message.includes("successfully")
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+          </form>
+        )}
+
+        <ConfirmModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onConfirm={handleOverwrite}
+          message="An entry for this date already exists. Do you want to overwrite it?"
+        />
+      </div>
+    </>
   );
 }

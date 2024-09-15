@@ -145,7 +145,7 @@ function AddParameterPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
+    <div className="max-w-lg mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         Add New Parameter
       </h1>
