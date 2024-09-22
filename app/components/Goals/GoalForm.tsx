@@ -2,21 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -27,6 +16,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { GoalFormData } from "@/app/types/Goal";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GoalForm({
   onSubmit,
@@ -40,10 +30,29 @@ export default function GoalForm({
     description: "",
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = () => {
+    if (
+      formData.title === "" ||
+      formData.status === "" ||
+      formData.deadline === new Date() ||
+      formData.description === ""
+    ) {
+      toast({
+        title: "Error",
+        description: "Please fill all fields",
+        variant: "destructive",
+      });
+      return;
+    }
     onSubmit(formData);
-    setFormData({ title: "", status: "", deadline: new Date(), description: "" });
+    setFormData({
+      title: "",
+      status: "",
+      deadline: new Date(),
+      description: "",
+    });
   };
 
   return (

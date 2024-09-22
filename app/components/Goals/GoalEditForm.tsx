@@ -24,10 +24,10 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { GoalFormData, IGoal, GoalFormEditData } from "@/app/types/Goal";
+import { IGoal, GoalFormEditData } from "@/app/types/Goal";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
-
+import { useToast } from "@/hooks/use-toast";
 export default function GoalEditForm({
   goals,
   onSubmit,
@@ -42,7 +42,7 @@ export default function GoalEditForm({
     deadline: new Date(),
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
-
+  const { toast } = useToast();
   const filteredGoals = goals.filter((goal) => goal.status === "Active");
 
   // Aktualizuj dane formularza po wybraniu celu
@@ -59,6 +59,19 @@ export default function GoalEditForm({
   };
   const handleSubmit = () => {
     if (selectedGoalId) {
+      if (
+        formData.title === "" ||
+        formData.deadline === new Date() ||
+        formData.description === ""
+      ) {
+        toast({
+          title: "Error",
+          description: "Please fill all fields",
+          variant: "destructive",
+        });
+        return;
+      }
+
       onSubmit(formData, selectedGoalId);
       setSelectedGoalId("");
       setFormData({
