@@ -18,6 +18,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface DailyParametersProps {
   onSubmit: (data: Record<string, any>) => void;
@@ -80,17 +81,15 @@ export default function DailyParameters({ onSubmit }: DailyParametersProps) {
   };
 
   return (
-    <Card className="flex flex-col border-none col-span-3">
+    <Card className="flex flex-col border-l-[1px] border-y-0 border-r-0 rounded-l-none col-span-3">
       <CardHeader>
         <CardTitle>Your Daily Parameters</CardTitle>
       </CardHeader>
-      <CardContent className="h-full grid grid-cols-5 gap-4 grid-rows-2">
+      <CardContent className="h-full grid grid-cols-6 gap-4 grid-rows-2">
         {parameters.map((parameter) => (
-          <Card key={parameter.id} className="mb-4 grid">
-            <CardHeader>
-              <CardTitle>{parameter.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card key={parameter.id} className="mb-4 grid border-none">
+            <CardContent className="p-4">
+              <Label>{parameter.name}</Label>
               {parameter.type === "boolean" ? (
                 <Select
                   value={formData[parameter.id] ? "Yes" : "No"}
