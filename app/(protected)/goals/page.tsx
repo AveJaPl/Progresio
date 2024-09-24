@@ -9,17 +9,23 @@ import { IGoal, GoalFormData } from "@/app/types/Goal";
 import GoalEditForm from "@/app/components/Goals/GoalEditForm";
 import { GoalFormEditData } from "@/app/types/Goal";
 import { useToast } from "@/hooks/use-toast";
+import { getData, postData } from "@/app/utils/sendRequest";
 
 export default function Goals() {
   const [goals, setGoals] = useState<IGoal[]>([]);
   const { toast } = useToast();
   const fetchGoals = async () => {
     try {
-      const response = await fetch("/api/goals");
-      if (!response.ok) {
-        throw new Error("Nie udało się pobrać celów.");
+      const { status, data } = await getData("/api/goals");
+
+      if (status !== 200) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch goals",
+          variant: "destructive",
+        });
+        return;
       }
-      const data = await response.json();
       setGoals(data);
     } catch (error) {
       console.error("Błąd podczas pobierania celów:", error);
@@ -31,30 +37,23 @@ export default function Goals() {
   }, []);
 
   const addGoal = async (data: GoalFormData) => {
-    await fetch("/api/goals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: data.title,
-        status: "Active",
-        deadline: data.deadline.toISOString(),
-        description: data.description,
-      }),
-    })
-      .then(() => {
-        toast({
-          title: "Goal added",
-          description: "Goal has been added successfully",
-        });
-        fetchGoals();
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Failed to add goal.",
-          variant: "destructive",
-        });
-      });
+    const { status } = await postData("/api/goals", {
+      title: data.title,
+      status: "Active",
+      deadline: data.deadline.toISOString(),
+      description: data.description,
+    });
+
+    toast({
+      title: status === 201 ? "Goal added" : "Error",
+      description:
+        status === 201
+          ? "Goal has been added successfully"
+          : "Failed to add goal.",
+      variant: status === 201 ? "default" : "destructive",
+    });
+
+    await fetchGoals();
   };
 
   const editGoal = async (data: GoalFormEditData, id: string) => {

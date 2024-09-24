@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 // components/LastGoals.tsx
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -13,22 +13,29 @@ import {
 import { useEffect, useState } from "react";
 
 import { IGoal } from "@/app/types/Goal";
+import { getData } from "@/app/utils/sendRequest";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LastGoals() {
   const [goals, setGoals] = useState<IGoal[]>([]);
+  const { toast } = useToast();
+
+  const fetchUpcomingGoals = async () => {
+    const { status, data } = await getData("/api/goals/upcoming");
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch upcoming goals",
+        variant: "destructive",
+      });
+      return;
+    }
+    setGoals(data);
+  };
 
   useEffect(() => {
-    fetch("/api/goals/upcoming", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => setGoals(data));
-  }
-  , []);
+    fetchUpcomingGoals();
+  }, []);
 
   return (
     <Card className="col-span-2">
@@ -47,7 +54,9 @@ export default function LastGoals() {
             {goals.map((goal, index) => (
               <TableRow key={index}>
                 <TableCell>{goal.title}</TableCell>
-                <TableCell>{(new Date(goal.deadline)).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(goal.deadline).toLocaleDateString()}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

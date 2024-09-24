@@ -27,28 +27,39 @@ import {
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useState } from "react";
-import { IParameter } from "@/app/types/Parameter";
+import { ParameterInput } from "@/app/types/Parameter";
 import { useToast } from "@/hooks/use-toast";
+import { postData } from "@/app/utils/sendRequest";
 
 interface AddParameterDialogProps {
   onParameterAdded: () => void;
 }
 
-export default function AddParameterDialog({ onParameterAdded }: AddParameterDialogProps) {
+export default function AddParameterDialog({
+  onParameterAdded,
+}: AddParameterDialogProps) {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Definicja schematu walidacji z użyciem zod
   const formSchema = z.object({
-    name: z.string().nonempty("Parameter Name is required"),
+    name: z.string().min(1, "Parameter name is required"),
     type: z.enum(["number", "string", "boolean"]),
-    goalValue: z.string().nonempty("Goal Value is required"),
     goalOperator: z.string().optional(),
+    goalValue: z.string().optional(),
   });
 
-  const form = useForm<IParameter>({
+  type FormData = z.infer<typeof formSchema>;
+
+  const form = useForm<ParameterInput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -58,33 +69,26 @@ export default function AddParameterDialog({ onParameterAdded }: AddParameterDia
     },
   });
 
-  const onSubmit = (data: IParameter) => {
-    fetch("/api/parameters", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then(() => {
-        onParameterAdded();
-        toast({
-          title: "Success",
-          description: "Parameter added successfully",
-          variant: "default",
-        });
-        form.reset();
-        setDialogOpen(false);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Failed to add parameter",
-          variant: "destructive",
-        });
-      });
+  const onSubmit = async(dataToPost: ParameterInput) => {
+
+    const { status } = await postData("/api/goals", dataToPost);
+    toast({
+      title: status === 201 ? "Goal added" : "Error",
+      description:
+        status === 201
+          ? "Goal has been added successfully"
+          : "Failed to add goal.",
+      variant: status === 201 ? "default" : "destructive",
+    });
+
+    if (status !== 201) {
+      return;
+    }
+
+    onParameterAdded();
+    form.reset();
+    setDialogOpen(false);
+
   };
 
   return (
@@ -128,9 +132,9 @@ export default function AddParameterDialog({ onParameterAdded }: AddParameterDia
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value);
-                              form.setValue("type", value);
+                              form.setValue("type", value as FormData["type"]);
                             }}
-                            defaultValue={field.value}
+                            value={field.value}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select Type" />

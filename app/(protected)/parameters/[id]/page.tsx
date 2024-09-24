@@ -1,86 +1,61 @@
 // [id]/page.tsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Alert } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
 import Loading from "@/app/components/loading";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface ProgressEntry {
-  date: string;
-  value: number;
-  success: boolean;
-}
-
-interface Parameter {
-  id: string;
-  name: string;
-  type: string;
-  goalValue: string;
-  goalOperator: string;
-  progress: ProgressEntry[]; // Array for progress data
-}
+import { ParameterWithCount } from "@/app/types/Parameter";
+import { calculateStreak } from "@/app/utils/calculateStreak";
+import { StreakResult } from "@/app/types/StreakResult";
 
 export default function ParameterPage() {
   const { id } = useParams();
-  const [parameter, setParameter] = useState<Parameter | null>(null);
+  const [parameter, setParameter] = useState<ParameterWithCount | null>(null);
   const [loading, setLoading] = useState(true);
-  const [consecutiveSuccesses, setConsecutiveSuccesses] = useState(0); // New streak counter
-  const [search, setSearch] = useState(""); // Initialize search state
+  const [latestEntrySuccess, setLatestEntrySuccess] = useState<boolean | null>(
+    null
+  );
+  const [search, setSearch] = useState<string>("");
+  const [streakResult, setStreakResult] = useState<StreakResult>({
+    currentStreak: 0,
+    longestStreak: 0,
+    totalSuccesses: 0,
+    totalFailures: 0,
+    latestEntrySuccess: null,
+  });
 
   useEffect(() => {
-    fetch(`/api/parameters/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setParameter(data || null); // Ensure data is either an object or null
-        setLoading(false);
-        if (data && data.progress) {
-          calculateStreak(data.progress);
+    const fetchParameter = async () => {
+      try {
+        const response = await fetch(`/api/parameters/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch parameter");
         }
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-  }, [id]);
-
-  const calculateStreak = (progress: ProgressEntry[]) => {
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let failedDays = 0;
-    let successStreak = 0;
-
-    for (let i = 0; i < progress.length; i++) {
-      if (progress[i].success) {
-        currentStreak += 1;
-        successStreak += 1;
-        if (currentStreak > longestStreak) {
-          longestStreak = currentStreak;
+        const data: ParameterWithCount = await response.json();
+        setParameter(data || null);
+        if (data) {
+          setStreakResult(calculateStreak(data));
         }
-      } else {
-        currentStreak = 0;
-        failedDays += 1;
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
       }
-    }
-    setConsecutiveSuccesses(longestStreak);
-  };
+    };
+
+    fetchParameter();
+  }, [id]);
 
   if (loading) {
     return <Loading />;
@@ -94,73 +69,126 @@ export default function ParameterPage() {
     );
   }
 
-  // Safeguard against empty or undefined progress array
-  const progressData = parameter.progress ?? [];
+  // Sort and filter dataEntries based on search
+  const sortedEntries = [...parameter.dataEntries].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
-  // Calculate statistics
-  const totalSuccesses = progressData.filter((entry) => entry.success).length;
-  const totalFailures = progressData.length - totalSuccesses;
-  const latestEntrySuccess =
-    progressData.length > 0 && progressData[progressData.length - 1].success;
-
-  const filteredProgressData = progressData.filter((entry) => {
-    return entry.value.toString().includes(search);
+  const filteredProgressData = sortedEntries.filter((entry) => {
+    // search by value and date
+    return (
+      entry.value.toLowerCase().includes(search.toLowerCase()) ||
+      new Date(entry.date).toLocaleDateString().includes(search)
+    );
   });
 
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>{parameter.name}</CardTitle>
-          <Badge variant="outline" className="bg-primary">
-            {parameter.type}
-          </Badge>
-        </CardHeader>
-        <CardContent>
-          {/* Statistics Blocks */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">Longest Streak</h3>
-              <p className="text-2xl font-semibold">{consecutiveSuccesses}</p>
-              <p className="text-muted-foreground">Times in a row</p>
-            </div>
-            <div className="p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">Total Successes</h3>
-              <p className="text-2xl font-semibold">{totalSuccesses}</p>
-              <p className="text-muted-foreground">Days achieved</p>
-            </div>
-            <div className="p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">Total Failures</h3>
-              <p className="text-2xl font-semibold">{totalFailures}</p>
-              <p className="text-muted-foreground">Days failed</p>
-            </div>
+    <Card>
+      <CardHeader className="flex flex-row px-12 justify-between items-center">
+        <CardTitle className="text-2xl font-semibold">
+          {parameter.name}
+        </CardTitle>
+        <Badge variant="outline" className="bg-primary">
+          {parameter.type}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        {/* Statistics Blocks */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="p-4 rounded-lg text-center">
+            <h3 className="text-xl font-bold">Longest Streak</h3>
+            <p className="text-2xl font-semibold">
+              {streakResult.longestStreak}
+            </p>
+            <p className="text-gray-600">Times in a row</p>
           </div>
+          <div className="p-4 rounded-lg text-center">
+            <h3 className="text-xl font-bold">Total Successes</h3>
+            <p className="text-2xl font-semibold">
+              {streakResult.totalSuccesses}
+            </p>
+            <p className="text-gray-600">Days achieved</p>
+          </div>
+          <div className="p-4 rounded-lg text-center">
+            <h3 className="text-xl font-bold">Total Failures</h3>
+            <p className="text-2xl font-semibold">
+              {streakResult.totalFailures}
+            </p>
+            <p className="text-gray-600">Days failed</p>
+          </div>
+        </div>
 
-          {/* Progress Table */}
-          <h2 className="text-lg font-semibold mb-4">Progress Entries</h2>
-          <div className="overflow-x-auto">
-            {progressData.length > 0 ? (
-              <Card className="h-full">
-                <CardHeader>
-                  <h2 className="text-xl font-semibold">Goals</h2>
+        {/* Progress Table */}
+        <h2 className="text-lg font-semibold mb-4">Progress Entries</h2>
+        <div className="overflow-x-auto">
+          {sortedEntries.length > 0 ? (
+            <Card className="h-full">
+              <CardHeader className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Goals</h2>
+                <div className="w-full flex items-center justify-end">
                   <Input
                     type="text"
                     placeholder="Search goals"
                     className="w-1/3"
+                    value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-4 gap-4 space-y-2 border-border border-b-2 py-2">
-                    <div className="col-span-2">Date</div>
-                    <div className="col-span-1">Value</div>
-                    <div className="col-span-1">Status</div>
-                  </div>
-                  <ScrollArea className="h-[calc(100vh-650px)] w-full">
-                    {filteredProgressData.map((entry, index) => (
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4 space-y-2 border-b-2 border-gray-300 py-2">
+                  <div className="col-span-2 font-medium">Date</div>
+                  <div className="col-span-1 font-medium">Value</div>
+                  <div className="col-span-1 font-medium">Status</div>
+                </div>
+                <ScrollArea className="h-80 w-full">
+                  {filteredProgressData.map((entry) => {
+                    // Determine success based on parameter's type and goal
+                    let isSuccess = false;
+                    const { goalOperator, goalValue, type } = parameter;
+                    let parsedGoalValue: number | string | boolean;
+
+                    if (type === "number") {
+                      parsedGoalValue = parseFloat(goalValue);
+                      const entryValue = parseFloat(entry.value);
+                      if (isNaN(parsedGoalValue) || isNaN(entryValue)) {
+                        isSuccess = false;
+                      } else {
+                        switch (goalOperator) {
+                          case ">=":
+                            isSuccess = entryValue >= parsedGoalValue;
+                            break;
+                          case "<=":
+                            isSuccess = entryValue <= parsedGoalValue;
+                            break;
+                          case "=":
+                            isSuccess = entryValue === parsedGoalValue;
+                            break;
+                          case ">":
+                            isSuccess = entryValue > parsedGoalValue;
+                            break;
+                          case "<":
+                            isSuccess = entryValue < parsedGoalValue;
+                            break;
+                          default:
+                            isSuccess = false;
+                        }
+                      }
+                    } else if (type === "boolean") {
+                      parsedGoalValue =
+                        goalValue.toLowerCase() === "yes" ? true : false;
+                      const entryValue =
+                        entry.value.toLowerCase() === "true" ? true : false;
+                      isSuccess = entryValue === parsedGoalValue;
+                    } else {
+                      // string type
+                      isSuccess = entry.value === goalValue;
+                    }
+
+                    return (
                       <div
-                        key={index}
-                        className="grid grid-cols-4 gap-4 space-y-2 border-border border-b py-2"
+                        key={entry.id}
+                        className="grid grid-cols-4 gap-4 space-y-2 border-b py-2"
                       >
                         <div className="col-span-2">
                           {new Date(entry.date).toLocaleDateString()}
@@ -168,27 +196,26 @@ export default function ParameterPage() {
                         <div>{entry.value}</div>
                         <div>
                           <Badge
-                            className={
-                              entry.success
-                                ? `bg-green-500 text-white`
-                                : `bg-red-500 text-white`
-                            }
+                            variant={isSuccess ? "default" : "outline"}
+                            className="w-16 flex justify-center items-center"
                           >
-                            {entry.success ? "Success" : "Failed"}
+                            {isSuccess ? "Success" : "Failed"}
                           </Badge>
                         </div>
                       </div>
-                    ))}
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            ) : (
-              <p>No progress entries available.</p>
-            )}
-          </div>
+                    );
+                  })}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          ) : (
+            <p>No progress entries available.</p>
+          )}
+        </div>
 
-          {/* Latest entry status */}
-          {latestEntrySuccess ? (
+        {/* Latest entry status */}
+        {latestEntrySuccess !== null &&
+          (latestEntrySuccess ? (
             <Alert className="mt-6" variant="default">
               Congratulations! You achieved your goal in the last entry.
             </Alert>
@@ -196,9 +223,8 @@ export default function ParameterPage() {
             <Alert className="mt-6" variant="destructive">
               You missed your goal in the last entry. Keep pushing!
             </Alert>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+      </CardContent>
+    </Card>
   );
 }

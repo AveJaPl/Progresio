@@ -5,27 +5,34 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { IGoal } from "@/app/types/Goal";
+import { getData } from "@/app/utils/sendRequest";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Statistics() {
   const [progress, setProgress] = useState(0);
+  const { toast } = useToast();
+
+  const fetchGoals = async () => {
+    const { status, data } = await getData("/api/goals");
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch goals",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalGoals = data.length;
+    const completedGoals = data.filter(
+      (goal: IGoal) => goal.status === "Completed"
+    ).length;
+    const progress = Math.round((completedGoals / totalGoals) * 100);
+    setProgress(progress);
+  };
 
   useEffect(() => {
-    fetch("/api/goals", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const totalGoals = data.length;
-        const completedGoals = data.filter(
-          (goal: IGoal) => goal.status === "Completed"
-        ).length;
-        const progress = Math.round((completedGoals / totalGoals) * 100);
-        setProgress(progress);
-      });
+    fetchGoals();
   }, []);
   return (
     <Card>

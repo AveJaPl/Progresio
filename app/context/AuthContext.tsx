@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { postData } from "../utils/sendRequest";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,38 +22,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const checkAuth = async () => {
     setLoading(true);
-    fetch("/api/me", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then((res) => {
-        console.log("Response from /api/me:", res);
-        if (res.ok) {
-          setAuthenticated(true);
-        } else {
-          setAuthenticated(false);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching /api/me:", error);
-        setAuthenticated(false);
-        setLoading(false);
-      });
-  }, []); // Prawidłowe zamknięcie useEffect
+    const { status } = await postData("/api/me", {});
+    setAuthenticated(status === 200);
+    setLoading(false);
+  };
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const logout = async () => {
-    await fetch("/api/logout", {
-      method: "POST",
-    });
-    setAuthenticated(false);
-    Cookies.remove("token");
+    const { status } = await postData("/api/logout", {});
+    setAuthenticated(status !== 200);
+    if (status === 200) {
+      Cookies.remove("token");
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setAuthenticated, logout, loading }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, setAuthenticated, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
