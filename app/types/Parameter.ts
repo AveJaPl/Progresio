@@ -1,26 +1,18 @@
-import { Progress } from './Progress';
+import { BaseParameter } from './BaseParameter';
+import { DataEntry } from './DataEntry';
 
-export interface Parameter {
+
+export interface ParameterInput extends BaseParameter {}
+export interface Parameter extends BaseParameter {
     id: string;
-    name: string;
-    type: string;
-    goalOperator: string;
-    goalValue: string;
-    progress: Progress[];
+    dataEntries: DataEntry[];
 }
 
-export interface IDbParameter {
+export interface DbParameter extends BaseParameter {
     id: string;
-    name: string;
-    type: string;
-    goalOperator: string;
-    goalValue: string;
     userId: string;
 }
 
-export interface IParameter {
-    name: string;
-    type: string;
-    goalOperator: string;
-    goalValue: string;
+export interface ParameterWithCount extends Parameter {
+    dataEntriesCount: number;
 }
