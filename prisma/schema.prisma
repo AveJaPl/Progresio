@@ -12,31 +12,26 @@ model User {
   email      String      @unique
   password   String
   parameters Parameter[]
-  progress   Progress[]
-  goals       Goal[]
+  goals      Goal[]
 }
 
 model Parameter {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   type         String
   goalValue    String
   goalOperator String?
-  userId       String     @db.ObjectId
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  progress     Progress[]
+  userId       String           @db.ObjectId
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dataEntries  ParameterData[]  // Renamed from 'progress' to 'dataEntries'
 }
 
-model Progress {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  parameterId String    @db.ObjectId
+model ParameterData {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  parameterId String     @db.ObjectId
   value       String
-  date        DateTime  @default(now())
-  userId      String    @db.ObjectId
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parameter   Parameter @relation(fields: [parameterId], references: [id], onDelete: Cascade)
-
-  @@unique([parameterId, date, userId], name: "parameterId_date_userId_unique")
+  date        DateTime   @default(now())
+  parameter   Parameter  @relation(fields: [parameterId], references: [id], onDelete: Cascade)
 }
 
 model Goal {
