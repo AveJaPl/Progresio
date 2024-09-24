@@ -31,7 +31,54 @@ export async function POST(request: Request) {
       },
     });
 
-    // Możesz tutaj ustawić sesję lub token JWT
+    // Ustawienie defaultowych parametrów
+    await prisma.parameter.createMany({
+      data: [
+        {
+          name: 'Sleep [h]',
+          type: 'number',
+          goalValue: "8",
+          goalOperator: '>=',
+          userId: user.id,
+        },{
+          name: 'Steps',
+          type: 'number',
+          goalValue: "10000",
+          goalOperator: '>=',
+          userId: user.id,
+        },{
+          name: 'Water [ml]',
+          type: 'number',
+          goalValue: "2000",
+          goalOperator: '>=',
+          userId: user.id,
+        },{
+          name: 'Workout',
+          type: 'boolean',
+          goalValue: "true",
+          goalOperator: '=',
+          userId: user.id,
+        }, {
+          name: 'Book [pages]',
+          type: 'number',
+          goalValue: "10",
+          goalOperator: '>=',
+          userId: user.id,
+        }, {
+          name: 'Meditation [min]',
+          type: 'number',
+          goalValue: "10",
+          goalOperator: '>=',
+          userId: user.id,
+        }, {
+          name: 'Calories',
+          type: 'number',
+          goalValue: "2200",
+          goalOperator: '<=',
+          userId: user.id,
+        }
+      ]
+    });
 
     return NextResponse.json({ message: 'Registered successfully.' });
   } catch (error) {
