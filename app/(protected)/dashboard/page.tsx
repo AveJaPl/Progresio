@@ -3,7 +3,8 @@ import Summary from "@/app/components/Dashboard/Summary";
 import LastGoals from "@/app/components/Dashboard/LastGoals";
 import RecentActivities from "@/app/components/Dashboard/RecentActivities";
 import Statistics from "@/app/components/Dashboard/Statistics";
-import DailyCompletion from "@/app/components/Dashboard/DailyCompletion";
+import GoalsList from "@/app/components/Dashboard/GoalsList";
+import DailyParameters from "@/app/components/Dashboard/DailyParameters";
 
 export default function Dashboard() {
   return (
@@ -15,7 +16,10 @@ export default function Dashboard() {
         <Statistics />
       </div>
       <div className="grid gap-4">
-          <DailyCompletion />
+        <div className="col-span-3 grid grid-cols-4 grid-rows[1fr,1fr,auto] gap-4">
+          <GoalsList />
+          <DailyParameters />
+        </div>
       </div>
     </div>
   );
