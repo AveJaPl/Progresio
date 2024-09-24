@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (existingData && !overwrite) {
+  if (existingData.length && !overwrite) {
     return NextResponse.json(
       { error: "Data already exists for this date" },
       { status: 400 }
