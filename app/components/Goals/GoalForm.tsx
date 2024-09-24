@@ -35,7 +35,6 @@ export default function GoalForm({
   const handleSubmit = () => {
     if (
       formData.title === "" ||
-      formData.status === "" ||
       formData.deadline === new Date() ||
       formData.description === ""
     ) {
