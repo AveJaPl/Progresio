@@ -7,9 +7,7 @@ const password = process.env.ENCRYPTION_PASSWORD!;
 const key = crypto.createHash("sha256").update(password).digest();
 
 // Funkcja do szyfrowania danych
-export function encrypt(value: string | number): string | number {
-  const text = typeof value === "number" ? value.toString() : value;
-
+export function encrypt(text: string): string {
   const iv = crypto.randomBytes(16); // Losowy wektor inicjalizujący (IV)
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
 
