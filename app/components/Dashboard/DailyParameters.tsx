@@ -29,6 +29,13 @@ import {
 } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { getData, postData } from "@/app/utils/sendRequest";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export default function DailyParameters() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -38,6 +45,7 @@ export default function DailyParameters() {
   });
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const fetchParameters = async () => {
     const getResponse = await getData("/api/parameters");
@@ -52,7 +60,7 @@ export default function DailyParameters() {
     setParameters(getResponse.data);
     const initialFormData = getResponse.data.map((param: Parameter) => ({
       id: param.id,
-      value: param.type === "boolean" ? true : "",
+      value: param.type === "boolean" ? false : "",
     }));
 
     setFormData((prev) => ({
@@ -65,19 +73,27 @@ export default function DailyParameters() {
     fetchParameters();
   }, []);
 
-  const handleSubmit = async (dataToPost: Record<string, any>) => {
-    const {status} = await postData("/api/daily-parameters", dataToPost);
-    
-    // TODO obsłużyć Modal który pyta czy wysłać dane z tego samego dnia -> zobacz api/daily-parameters.ts code 400
-    // if (status == 400) {
-    //   setModalOpen(true);
-    //   return;
-    // }
+  const handleSubmit = async (
+    dataToPost: Record<string, any>,
+    overwrite: boolean
+  ) => {
+    const { status } = await postData("/api/daily-parameters", {
+      ...dataToPost,
+      overwrite,
+    });
+
+    if (status === 400) {
+      setModalOpen(true);
+      return;
+    }
 
     toast({
-      variant: status == 200 ? "default" : "destructive",
-      title: status == 200 ? "Success" : "Error",
-      description: status == 200 ? "Parameter added successfully" : "Failed to add parameters",
+      variant: status === 200 ? "default" : "destructive",
+      title: status === 200 ? "Success" : "Error",
+      description:
+        status === 200
+          ? "Parameter added successfully"
+          : "Failed to add parameters",
     });
     return;
   };
@@ -91,40 +107,30 @@ export default function DailyParameters() {
     }));
   };
 
-  const handleUpdate = () => {
-    // check for any wrong values in booleand fields
-    const booleanFields = parameters.filter(
-      (param) => param.type === "boolean"
-    );
-    let dataToSubmit = [...formData.data];
-    if (booleanFields.length > 0) {
-      booleanFields.forEach((param) => {
-        const fieldIndex = dataToSubmit.findIndex(
-          (item) => item.id === param.id
-        );
+  const handleUpdate = (overwriteFlag = false) => {
+    const mappedData = formData.data.map((param) => {
+      const parameterDefinition = parameters.find((p) => p.id === param.id);
+      let value = param.value;
 
-        if (fieldIndex !== -1) {
-          const fieldValue = dataToSubmit[fieldIndex].value;
+      if (parameterDefinition?.type === "number") {
+        value = Number(param.value);
+      } else if (parameterDefinition?.type === "boolean") {
+        value = param.value === "true" || param.value === true;
+      }
 
-          // Correct the boolean field values
-          if (fieldValue === "No") {
-            dataToSubmit[fieldIndex].value = false;
-          } else if (fieldValue === "Yes") {
-            dataToSubmit[fieldIndex].value = true;
-          }
-        }
-      });
-    }
-
-    const mappedData = dataToSubmit.map((param) => ({
-      ...param,
-      value: param.value.toString(),
-    }));
-
-    handleSubmit({
-      date: formData.date,
-      data: mappedData,
+      return {
+        id: param.id,
+        value: value.toString(),
+      };
     });
+
+    handleSubmit(
+      {
+        date: formData.date,
+        data: mappedData,
+      },
+      overwriteFlag
+    );
   };
 
   return (
@@ -166,34 +172,27 @@ export default function DailyParameters() {
                   <Label>{parameter.name}</Label>
                   {parameter.type === "boolean" ? (
                     <Select
-                      value={paramData?.value ? "Yes" : "No"}
+                      value={String(paramData?.value)}
                       onValueChange={(value) =>
-                        handleInputChange(parameter.id, value === "Yes")
+                        handleInputChange(parameter.id, value === "true")
                       }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Value" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="true">Yes</SelectItem>
+                        <SelectItem value="false">No</SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
                     <Input
                       type={parameter.type === "number" ? "number" : "text"}
-                      value={
-                        parameter.type === "number"
-                          ? Number(paramData?.value)
-                          : paramData?.value || ""
-                      }
+                      value={paramData?.value || ""}
                       onChange={(e) => {
-                        const value =
-                          parameter.type === "number"
-                            ? Number(e.target.value)
-                            : e.target.value;
-                        handleInputChange(parameter.id, value);
+                        handleInputChange(parameter.id, e.target.value);
                       }}
+                      placeholder= {parameter.type === "number" ? "Enter a number" : "Enter a value"}
                     />
                   )}
                 </CardContent>
@@ -203,8 +202,48 @@ export default function DailyParameters() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end items-end">
-        <Button onClick={handleUpdate}>Update</Button>
+        <Button onClick={() => handleUpdate()}>Update</Button>
       </CardFooter>
+      <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
+        <AlertDialogContent className="p-6 space-y-6">
+          <AlertDialogHeader className="space-y-4">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="mb-6 p-4 pt-2 border-border border-b-2">
+                <CardTitle>Data Already Exists</CardTitle>
+              </CardHeader>
+              <CardContent>
+                Data for this date already exists. Do you want to overwrite it?
+              </CardContent>
+              <CardFooter className="flex justify-end p-0 space-x-4">
+                <AlertDialogCancel asChild>
+                  <Button
+                    onClick={() => {
+                      setModalOpen(false);
+                      toast({
+                        variant: "default",
+                        title: "Ok!",
+                        description: "Data not overwritten",
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button
+                    onClick={() => {
+                      handleUpdate(true);
+                      setModalOpen(false);
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </AlertDialogAction>
+              </CardFooter>
+            </Card>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

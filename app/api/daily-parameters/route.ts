@@ -9,14 +9,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { date, data } = await request.json();
+  const { date, data, overwrite } = await request.json();
 
-  // Obsłużyć Modal który pyta czy wysłać dane z tego samego dnia
-  // if (date) {
-  //   return NextResponse.json({ error: "Parameters with this date already exists" }, { status: 400 });
-  // }
+  const existingData = await prisma.parameterData.findMany({
+    where: {
+      date: date,
+    },
+  });
 
+  if (existingData && !overwrite) {
+    return NextResponse.json(
+      { error: "Data already exists for this date" },
+      { status: 400 }
+    );
+  }
 
+  if (existingData && overwrite) {
+    await prisma.parameterData.deleteMany({
+      where: {
+        date: date,
+      },
+    });
+  }
 
   const dataEntry = await prisma.parameterData.createMany({
     data: data.map((entry: any) => ({
