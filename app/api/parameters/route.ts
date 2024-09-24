@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
-import { IDbParameter } from "@/app/types/Parameter";
 import { encrypt, decrypt } from "@/app/utils/encryption";
 
 export async function GET(request: NextRequest) {
@@ -9,30 +8,35 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get("token")?.value;
 
     if (!token) {
-      return NextResponse.json({ error: "Brak dostępu" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       userId: string;
     };
 
-    const parameters = (await prisma.parameter.findMany({
-      where: {
-        userId: decoded.userId,
+    const parameters = await prisma.parameter.findMany({
+      where: { userId: decoded.userId },
+      include: {
+        _count: {
+          select: { dataEntries: true }, // Use 'dataEntries' as per updated schema
+        },
       },
-    })) as IDbParameter[];
-
-    // unhash name and goalValue
-    parameters.forEach((parameter) => {
-      parameter.goalValue = decrypt(parameter.goalValue)
-      parameter.name = decrypt(parameter.name);
     });
 
-    return NextResponse.json(parameters);
+    // Decrypt parameters and include dataEntriesCount
+    const decryptedParameters = parameters.map((parameter) => ({
+      ...parameter,
+      name: decrypt(parameter.name),
+      goalValue: decrypt(parameter.goalValue),
+      dataEntriesCount: parameter._count.dataEntries,
+    }));
+
+    return NextResponse.json(decryptedParameters);
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Wystąpił błąd podczas pobierania celów" },
+      { error: "Error fetching parameters" },
       { status: 500 }
     );
   }
