@@ -24,6 +24,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    if (parameters.length === 0) {
+      return NextResponse.json(
+        { error: "Error fetching parameters" },
+        { status: 500 }
+      );
+    }
+
     // Decrypt parameters and include dataEntriesCount
     const decryptedParameters = parameters.map((parameter) => ({
       ...parameter,

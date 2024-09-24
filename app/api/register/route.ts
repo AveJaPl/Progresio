@@ -1,8 +1,9 @@
 // app/api/register/route.ts
 
-import { NextResponse } from 'next/server';
-import { prisma } from '@/app/lib/prisma';
-import bcrypt from 'bcrypt';
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/lib/prisma";
+import bcrypt from "bcrypt";
+import { encrypt } from "@/app/utils/encryption";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User with this email already exists.' },
+        { error: "User with this email already exists." },
         { status: 400 }
       );
     }
@@ -31,61 +32,69 @@ export async function POST(request: Request) {
       },
     });
 
+    const defaultData = [
+      {
+        name: "Sleep [h]",
+        type: "number",
+        goalValue: "8",
+        goalOperator: ">=",
+        userId: user.id,
+      },
+      {
+        name: "Steps",
+        type: "number",
+        goalValue: "10000",
+        goalOperator: ">=",
+        userId: user.id,
+      },
+      {
+        name: "Water [ml]",
+        type: "number",
+        goalValue: "2000",
+        goalOperator: ">=",
+        userId: user.id,
+      },
+      {
+        name: "Workout",
+        type: "boolean",
+        goalValue: "true",
+        goalOperator: "=",
+        userId: user.id,
+      },
+      {
+        name: "Book [pages]",
+        type: "number",
+        goalValue: "10",
+        goalOperator: ">=",
+        userId: user.id,
+      },
+      {
+        name: "Meditation [min]",
+        type: "number",
+        goalValue: "10",
+        goalOperator: ">=",
+        userId: user.id,
+      },
+      {
+        name: "Calories",
+        type: "number",
+        goalValue: "2200",
+        goalOperator: "<=",
+        userId: user.id,
+      },
+    ];
     // Ustawienie defaultowych parametrów
     await prisma.parameter.createMany({
-      data: [
-        {
-          name: 'Sleep [h]',
-          type: 'number',
-          goalValue: "8",
-          goalOperator: '>=',
-          userId: user.id,
-        },{
-          name: 'Steps',
-          type: 'number',
-          goalValue: "10000",
-          goalOperator: '>=',
-          userId: user.id,
-        },{
-          name: 'Water [ml]',
-          type: 'number',
-          goalValue: "2000",
-          goalOperator: '>=',
-          userId: user.id,
-        },{
-          name: 'Workout',
-          type: 'boolean',
-          goalValue: "true",
-          goalOperator: '=',
-          userId: user.id,
-        }, {
-          name: 'Book [pages]',
-          type: 'number',
-          goalValue: "10",
-          goalOperator: '>=',
-          userId: user.id,
-        }, {
-          name: 'Meditation [min]',
-          type: 'number',
-          goalValue: "10",
-          goalOperator: '>=',
-          userId: user.id,
-        }, {
-          name: 'Calories',
-          type: 'number',
-          goalValue: "2200",
-          goalOperator: '<=',
-          userId: user.id,
-        }
-      ]
+      data: defaultData.map((parameter) => ({
+        ...parameter,
+        name: encrypt(parameter.name),
+        goalValue: encrypt(parameter.goalValue),
+      })),
     });
 
-    return NextResponse.json({ message: 'Registered successfully.' });
+    return NextResponse.json({ message: "Registered successfully." });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { error: 'An error occurred.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "An error occurred." }, { status: 500 });
   }
 }

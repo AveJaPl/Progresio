@@ -68,9 +68,9 @@ export default function ParametersList({
   const [selectedParameter, setSelectedParameter] =
     useState<ParameterWithCount | null>(null);
 
-  const filteredParameters = parameters.filter((parameter) => {
+  const filteredParameters = parameters.length ? parameters.filter((parameter) => {
     return parameter.name.toLowerCase().includes(search.toLowerCase());
-  });
+  }) : [];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
