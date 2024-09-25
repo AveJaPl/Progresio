@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/app/context/AuthContext";
 import Loading from "@/app/components/loading"; // Ensure this component exists
+import { postData } from "./utils/sendRequest";
 
 export default function AuthPage() {
   const [isRegister, setIsRegister] = useState(false);
@@ -63,31 +64,20 @@ export default function AuthPage() {
 
     const endpoint = isRegister ? "/api/register" : "/api/login";
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
+    const { status, message } = await postData(endpoint, {
+      email: formData.email,
+      password: formData.password,
     });
 
-    if (response.ok) {
+    toast({
+      variant: status === 200 ? "default" : "destructive",
+      title: status === 200 ? "Success" : "Error",
+      description: status === 200 ? "Login successful" : message,
+    });
+
+    if (status === 200) {
       setAuthenticated(true);
-      toast({
-        title: "Success",
-        description: "Login successful.",
-      });
       router.push("/dashboard");
-    } else {
-      const data = await response.json();
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: data.error || "An error occurred.",
-      });
     }
   };
 

@@ -50,11 +50,6 @@ export default function DailyParameters() {
   const fetchParameters = async () => {
     const getResponse = await getData("/api/parameters");
     if (getResponse.status !== 200) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch parameters",
-      });
       return;
     }
     setParameters(getResponse.data);
