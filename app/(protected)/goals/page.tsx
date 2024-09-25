@@ -10,9 +10,11 @@ import GoalEditForm from "@/app/components/Goals/GoalEditForm";
 import { GoalFormEditData } from "@/app/types/Goal";
 import { useToast } from "@/hooks/use-toast";
 import { getData, postData } from "@/app/utils/sendRequest";
+import Loading from "@/app/components/loading";
 
 export default function Goals() {
   const [goals, setGoals] = useState<IGoal[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const fetchGoals = async () => {
     try {
@@ -33,7 +35,9 @@ export default function Goals() {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchGoals();
+    setLoading(false);
   }, []);
 
   const addGoal = async (data: GoalFormData) => {
@@ -101,12 +105,26 @@ export default function Goals() {
       });
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-4 h-full flex flex-col">
+        <div className="flex flex-row gap-4">
+          <GoalForm onSubmit={addGoal} />
+          <GoalEditForm goals={goals} onSubmit={editGoal} loading={loading} />
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <Loading />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Formularz dodawania nowego celu */}
       <div className="flex flex-row gap-4">
         <GoalForm onSubmit={addGoal} />
-        <GoalEditForm goals={goals} onSubmit={editGoal} />
+        <GoalEditForm goals={goals} onSubmit={editGoal} loading={loading} />
       </div>
 
       {/* Tabela z listą celów */}

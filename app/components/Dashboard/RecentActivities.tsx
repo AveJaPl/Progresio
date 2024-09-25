@@ -10,7 +10,7 @@ export default function RecentActivities() {
   ];
 
   return (
-    <Card className="row-span-2">
+    <Card className="row-span-2 hidden xl:block xl:order-3">
       <CardHeader>
         <CardTitle>Ostatnie Aktywności</CardTitle>
       </CardHeader>

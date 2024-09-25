@@ -49,7 +49,7 @@ export default function GoalsList() {
   };
 
   return (
-    <Card className="col-span-1 h-full">
+    <Card className="w-full xl:col-span-1 xl:h-full">
       <CardHeader>
         <CardTitle>Your Active Goals</CardTitle>
       </CardHeader>

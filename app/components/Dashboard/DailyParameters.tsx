@@ -168,7 +168,7 @@ export default function DailyParameters() {
         </div>
       </CardHeader>
       <CardContent className="h-full p-4 flex flex-row">
-        <div className="w-3/4 h-full grid grid-cols-3 gap-4 grid-rows-[auto_1fr]">
+        <div className="w-full xl:w-3/4 h-full grid md:grid-cols-2 lg:grid-cols-3 gap-4 grid-rows-[auto_1fr]">
           {parameters.map((parameter) => {
             const paramData = formData.data.find(
               (item) => item.id === parameter.id

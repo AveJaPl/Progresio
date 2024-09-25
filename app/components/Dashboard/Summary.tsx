@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function Summary() {
   return (
-    <Card>
+    <Card className="order-1">
       <CardHeader>
         <CardTitle>Podsumowanie</CardTitle>
       </CardHeader>

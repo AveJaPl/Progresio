@@ -6,7 +6,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function Header() {
   const routes = [
@@ -14,7 +13,6 @@ function Header() {
     { name: "Goals", href: "/goals" },
     { name: "Parameters", href: "/parameters" },
     { name: "Stats", href: "/stats" },
-    { name: "Badges", href: "/badges" },
     { name: "Settings", href: "/settings" },
   ];
   return (

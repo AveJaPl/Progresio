@@ -38,7 +38,7 @@ export default function LastGoals() {
   }, []);
 
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-2 hidden xl:block xl:order-2">
       <CardHeader>
         <CardTitle>Upcoming Goals</CardTitle>
       </CardHeader>

@@ -31,9 +31,11 @@ import { useToast } from "@/hooks/use-toast";
 export default function GoalEditForm({
   goals,
   onSubmit,
+  loading
 }: {
   goals: IGoal[];
   onSubmit: (data: GoalFormEditData, id: string) => void;
+  loading: boolean;
 }) {
   const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [formData, setFormData] = useState<GoalFormEditData>({
@@ -88,7 +90,7 @@ export default function GoalEditForm({
         <h2 className="text-xl font-semibold">Edit Goal</h2>
         <Select value={selectedGoalId} onValueChange={handleGoalSelect}>
           <SelectTrigger id="goal">
-            <SelectValue placeholder="Select Goal" />
+            <SelectValue placeholder= {loading ? "Loading..." : "Select Goal"} />
           </SelectTrigger>
           <SelectContent>
             {filteredGoals.map((goal) => (

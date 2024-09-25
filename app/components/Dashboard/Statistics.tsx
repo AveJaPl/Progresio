@@ -35,7 +35,7 @@ export default function Statistics() {
     fetchGoals();
   }, []);
   return (
-    <Card>
+    <Card className="order-2 xl:order-4">
       <CardHeader>
         <CardTitle>Statystyki</CardTitle>
       </CardHeader>
