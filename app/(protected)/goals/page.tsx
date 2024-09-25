@@ -122,7 +122,7 @@ export default function Goals() {
   return (
     <div className="space-y-4">
       {/* Formularz dodawania nowego celu */}
-      <div className="flex flex-row gap-4">
+      <div className="flex w-full flex-col lg:flex-row gap-4">
         <GoalForm onSubmit={addGoal} />
         <GoalEditForm goals={goals} onSubmit={editGoal} loading={loading} />
       </div>

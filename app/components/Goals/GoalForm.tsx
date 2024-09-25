@@ -55,13 +55,13 @@ export default function GoalForm({
   };
 
   return (
-    <Card className="w-1/2 flex flex-col">
+    <Card className="w-full lg:w-1/2 flex flex-col">
       <CardHeader className="h-20">
         <h2 className="text-xl font-semibold">Create new goal</h2>
       </CardHeader>
       <CardContent className="space-y-4 h-full">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="xl:col-span-2">
             <Label htmlFor="title">Title</Label>
             <Input
               type="text"

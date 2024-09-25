@@ -36,7 +36,7 @@ export default function GoalTable({ goals, onDelete }: GoalTableProps) {
         <Input
           type="text"
           placeholder="Search goals"
-          className="w-1/3"
+          className=" w-56 md:w-72 xl:w-96"
           onChange={(e) => setSearch(e.target.value)}
         />
       </CardHeader>

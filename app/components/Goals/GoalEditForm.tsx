@@ -85,7 +85,7 @@ export default function GoalEditForm({
   };
 
   return (
-    <Card className="w-1/2 flex flex-col">
+    <Card className="w-full hidden lg:flex lg:w-1/2 flex-col">
       <CardHeader className="grid grid-cols-2 space-y-0 h-20">
         <h2 className="text-xl font-semibold">Edit Goal</h2>
         <Select value={selectedGoalId} onValueChange={handleGoalSelect}>
@@ -103,8 +103,8 @@ export default function GoalEditForm({
       </CardHeader>
       <CardContent className="space-y-4 h-full">
         {selectedGoalId && (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-2">
               <Label htmlFor="title">Title</Label>
               <Input
                 type="text"
