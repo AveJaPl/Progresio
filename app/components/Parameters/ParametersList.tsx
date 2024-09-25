@@ -169,7 +169,7 @@ export default function ParametersList({
         <CardTitle className="hidden xl:block">Parameters</CardTitle>
         <Input
           placeholder="Search parameters"
-          className="w-full xl:w-1/3"
+          className="w-full xl:w-80"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

@@ -21,7 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import {
   Popover,
   PopoverTrigger,
@@ -36,6 +36,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import Loading from "@/app/components/loading";
 
 export default function DailyParameters() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -46,6 +47,7 @@ export default function DailyParameters() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchParameters = async () => {
     const getResponse = await getData("/api/parameters");
@@ -65,7 +67,10 @@ export default function DailyParameters() {
   };
 
   useEffect(() => {
+    setLoading(true);
+
     fetchParameters();
+    setLoading(false);
   }, []);
 
   const handleSubmit = async (
@@ -128,6 +133,14 @@ export default function DailyParameters() {
     );
   };
 
+  if (loading) {
+    return (
+      <Card className="flex flex-col col-span-3">
+        <Loading />
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex flex-col col-span-3">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -187,7 +200,11 @@ export default function DailyParameters() {
                       onChange={(e) => {
                         handleInputChange(parameter.id, e.target.value);
                       }}
-                      placeholder= {parameter.type === "number" ? "Enter a number" : "Enter a value"}
+                      placeholder={
+                        parameter.type === "number"
+                          ? "Enter a number"
+                          : "Enter a value"
+                      }
                     />
                   )}
                 </CardContent>

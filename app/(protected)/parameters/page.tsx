@@ -6,9 +6,11 @@ import AddParameterDialog from "@/app/components//Parameters/AddParameterDialog"
 import { Card } from "@/components/ui/card";
 import { ParameterWithCount } from "@/app/types/Parameter";
 import { getData } from "@/app/utils/sendRequest";
+import Loading from "@/app/components/loading";
 
 export default function Parameters() {
   const [parameters, setParameters] = useState<ParameterWithCount[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchParameters = async () => {
     const getResponse = await getData("/api/parameters");
@@ -16,8 +18,18 @@ export default function Parameters() {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchParameters();
+    setLoading(false);
   }, []);
+
+  if (loading) {
+    return (
+      <Card className="border-none col-span-3 h-full flex items-center justify-center">
+        <Loading />
+      </Card>
+    );
+  }
 
   return (
     <Card className="grid border-none col-span-3 grid-rows[1fr,1fr,auto]">
