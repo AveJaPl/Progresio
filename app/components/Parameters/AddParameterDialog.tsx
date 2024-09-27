@@ -71,13 +71,13 @@ export default function AddParameterDialog({
 
   const onSubmit = async(dataToPost: ParameterInput) => {
 
-    const { status } = await postData("/api/goals", dataToPost);
+    const { status } = await postData("/api/parameters", dataToPost);
     toast({
-      title: status === 201 ? "Goal added" : "Error",
+      title: status === 201 ? "Parameter added" : "Error",
       description:
         status === 201
-          ? "Goal has been added successfully"
-          : "Failed to add goal.",
+          ? "Parameter has been added successfully"
+          : "Failed to add parameter.",
       variant: status === 201 ? "default" : "destructive",
     });
 

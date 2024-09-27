@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { getData } from "@/app/utils/sendRequest";
+import { postData } from "@/app/utils/sendRequest";
+
 export default function GoalsList() {
   const [goals, setGoals] = useState<IGoal[]>([]);
   const [completedGoals, setCompletedGoals] = useState<{
@@ -48,6 +50,30 @@ export default function GoalsList() {
     }));
   };
 
+  const handleSubmit = async () => {
+    const completedGoalIds = Object.entries(completedGoals)
+      .filter(([, value]) => value)
+      .map(([key]) => key);
+
+    const { status } = await postData("/api/goals/completed", {
+      goalIds: completedGoalIds,
+    });
+
+    toast({
+      title: status === 200 ? "Goals updated" : "Error",
+      description:
+        status === 200
+          ? "Goals have been updated successfully"
+          : "Failed to update goals.",
+      variant: status === 200 ? "default" : "destructive",
+    });
+
+    if (status === 200) {
+      fetchGoals();
+    }
+  }
+
+
   return (
     <Card className="w-full xl:col-span-1 xl:h-full">
       <CardHeader>
@@ -75,7 +101,11 @@ export default function GoalsList() {
           </ScrollArea>
         </ul>
         <div className="flex justify-end">
-          <Button variant="default" className="mt-4">
+          <Button 
+          variant="default" 
+          className="mt-4"
+          onClick={() => handleSubmit()}
+          >
             Submit
           </Button>
         </div>
