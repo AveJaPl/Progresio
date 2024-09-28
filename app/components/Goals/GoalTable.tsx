@@ -102,45 +102,51 @@ export default function GoalTable({
           <ScrollArea className="lg:h-[calc(70vh-250px)] w-full p-0 lg:p-4">
             <ScrollBar />
             <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-              {filteredGoals.map((goal) => (
-                <Card
-                  key={goal.id}
-                  className="grid grid-rows-3 grid-cols-[1fr_auto]"
-                >
-                  <CardHeader className="col-span-3 flex flex-row justify-between space-y-0">
-                    <h2>{goal.title}</h2>
-                    <div className="text-sm text-muted-foreground">
-                      {format(new Date(goal.deadline), "PPP", {
-                        locale: enUS,
-                      })}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="row-span-2 min-h-32 text-sm pl-6 pb-6 pr-2 text-muted-foreground">
-                    <ScrollArea className="h-36 w-full">
-                      <pre className="whitespace-pre-wrap">
-                        {goal.description}
-                      </pre>
-                    </ScrollArea>
-                  </CardContent>
-                  <CardFooter className="row-span-2 flex flex-col items-end justify-end h-full pb-6 pr-6 pl-0">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button
-                        className="order-2 sm:order-1"
-                        onClick={() => onDelete(goal.id)}
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        className="order-1 sm:order-2"
-                        disabled={goal.status.toLowerCase() === "active"}
-                        onClick={() => onReset(goal.id)}
-                      >
-                        Reset
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
+              {filteredGoals.length === 0 ? (
+                <div className="text-muted-foreground text-center col-span-3">
+                  No goals found
+                </div>
+              ) : (
+                filteredGoals.map((goal) => (
+                  <Card
+                    key={goal.id}
+                    className="grid grid-rows-3 grid-cols-[1fr_auto]"
+                  >
+                    <CardHeader className="col-span-3 flex flex-row justify-between space-y-0">
+                      <h2>{goal.title}</h2>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(goal.deadline), "PPP", {
+                          locale: enUS,
+                        })}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="row-span-2 min-h-32 text-sm pl-6 pb-6 pr-2 text-muted-foreground">
+                      <ScrollArea className="h-36 w-full">
+                        <pre className="whitespace-pre-wrap">
+                          {goal.description}
+                        </pre>
+                      </ScrollArea>
+                    </CardContent>
+                    <CardFooter className="row-span-2 flex flex-col items-end justify-end h-full pb-6 pr-6 pl-0">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Button
+                          className="order-2 sm:order-1"
+                          onClick={() => onDelete(goal.id)}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          className="order-1 sm:order-2"
+                          disabled={goal.status.toLowerCase() === "active"}
+                          onClick={() => onReset(goal.id)}
+                        >
+                          Reset
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))
+              )}
             </div>
           </ScrollArea>
         </CardContent>
