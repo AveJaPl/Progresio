@@ -37,6 +37,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import Loading from "@/app/components/loading";
+import { useAppContext } from "@/app/context/DashboardContext";
 
 export default function DailyParameters() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -48,6 +49,7 @@ export default function DailyParameters() {
   const { toast } = useToast();
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { refreshParameters } = useAppContext();
 
   const fetchParameters = async () => {
     const getResponse = await getData("/api/parameters");
@@ -85,6 +87,10 @@ export default function DailyParameters() {
     if (status === 400) {
       setModalOpen(true);
       return;
+    }
+
+    if (status === 200) {
+      refreshParameters();
     }
 
     toast({
@@ -168,7 +174,7 @@ export default function DailyParameters() {
         </div>
       </CardHeader>
       <CardContent className="h-full p-4 flex flex-row">
-        <div className="w-full xl:w-3/4 h-full grid md:grid-cols-2 lg:grid-cols-3 gap-4 grid-rows-[auto_1fr]">
+        <div className="w-full xl:w-3/4 h-full grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {parameters.map((parameter) => {
             const paramData = formData.data.find(
               (item) => item.id === parameter.id

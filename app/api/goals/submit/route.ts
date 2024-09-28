@@ -11,28 +11,32 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json({ error: "Brak dostępu" }, { status: 401 });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
       userId: string;
     };
 
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-
     const { data } = await request.json(); // array of goals ids
 
+    console.log(data);
+    
     const updatedGoals = await prisma.goal.updateMany({
-        where: {
+      where: {
+        AND: [
+          {
             id: {
-            in: data,
+              in: data,
             },
+          },
+          {
             userId: userId,
-        },
-        data: {
-            status: "Completed",
-            finishedAt: new Date(),
-        },
-        });
-
+          },
+        ],
+      },
+      data: {
+        status: "Completed",
+        finishedAt: new Date(),
+      },
+    });
 
     return NextResponse.json(updatedGoals, { status: 201 });
   } catch (error) {

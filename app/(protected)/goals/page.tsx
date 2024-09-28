@@ -105,6 +105,27 @@ export default function Goals() {
       });
   };
 
+  const handleResetStatus = async (id: string) => {
+    await fetch(`/api/goals/reset/${id}`, {
+      method: "PUT",
+    })
+      .then(() => {
+        toast({
+          title: "Status reset",
+          description: "Status has been reset successfully",
+        });
+        fetchGoals();
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to reset status.",
+          variant: "destructive",
+        });
+      }
+    );
+  }
+
   if (loading) {
     return (
       <div className="space-y-4 h-full flex flex-col">
@@ -128,7 +149,8 @@ export default function Goals() {
       </div>
 
       {/* Tabela z listą celów */}
-      <GoalTable goals={goals} onDelete={deleteGoal} />
+      <GoalTable goals={goals} onDelete={deleteGoal} onReset={handleResetStatus} />
     </div>
   );
+
 }

@@ -1,13 +1,11 @@
+"use client"
+
 // components/RecentActivities.tsx
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Activity } from "lucide-react";
-
+import { useAppContext } from "@/app/context/DashboardContext";
 export default function RecentActivities() {
-  const activities = [
-    { action: "Zalogowano się", date: "2023-10-01 12:34" },
-    { action: "Edytowano profil", date: "2023-09-28 09:21" },
-    { action: "Dodano nowy cel", date: "2023-09-25 15:47" },
-  ];
+  const { activities } = useAppContext();
 
   return (
     <Card className="row-span-2 hidden xl:block xl:order-3">
@@ -16,7 +14,7 @@ export default function RecentActivities() {
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
-          {activities.map((activity, index) => (
+          {activities?.map((activity, index) => (
             <li key={index} className="flex items-center">
               <Activity className="w-5 h-5 text-blue-500 mr-3" />
               <div>

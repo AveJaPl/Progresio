@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
 
-export async function GET(request: NextRequest) {
+
+export async function PUT(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
   try {
     const token = request.cookies.get("token")?.value;
 
@@ -13,22 +17,24 @@ export async function GET(request: NextRequest) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       userId: string;
     };
-    const upcomingGoals = await prisma.goal.findMany({
-      where: {
-        userId: decoded.userId,
-        status: "Active",
-      },
-      orderBy: {
-        deadline: "asc",
-      },
-      take: 3,
-    });
 
-    return NextResponse.json(upcomingGoals);
+    const { id } = params;
+
+    await prisma.goal.update({
+        where: {
+            id: id,
+         },
+        data: {
+            status: "Active",
+            finishedAt: null,
+        },
+        });
+
+    return NextResponse.json({ message: "Status reset" });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Wystąpił błąd podczas pobierania celów" },
+      { error: "Wystąpił błąd podczas resetowania statusu" },
       { status: 500 }
     );
   }
