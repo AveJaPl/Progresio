@@ -1,5 +1,3 @@
-// components/AddGoalModal.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -69,13 +67,15 @@ export default function AddGoalModal({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="sm:max-w-lg h-[calc(100hv-700px)]">
-        <AlertDialogHeader>
+      {/* Set fixed height and make the modal a flex container */}
+      <AlertDialogContent className="sm:max-w-lg h-[500px] flex flex-col justify-start">
+        <AlertDialogHeader className="flex justify-center items-start">
           <h2 className="text-xl font-semibold">Create New Goal</h2>
         </AlertDialogHeader>
-        {/* Formularz dodawania celu */}
-        <div className="space-y-4 py-4">
-          <div className="grid grid-cols-1 gap-4">
+        {/* Make the content area scrollable and allow it to grow */}
+        <div className="overflow-y-auto flex-grow">
+          {/* Formularz dodawania celu */}
+          <div className="flex flex-col space-y-4 p-2">
             <div>
               <Label htmlFor="title" className="mb-1">
                 Title
@@ -133,7 +133,7 @@ export default function AddGoalModal({
                     description: e.target.value,
                   })
                 }
-                rows={5}
+                rows={7}
               />
             </div>
             <div className="flex justify-end">

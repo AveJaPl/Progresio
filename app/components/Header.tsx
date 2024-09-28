@@ -102,7 +102,7 @@ function Header() {
       >
         <DrawerContent
           showBar={false}
-          className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none"
+          className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none border-none"
         >
           {/* Button to close the menu */}
           <Button

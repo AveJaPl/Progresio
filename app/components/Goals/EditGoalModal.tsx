@@ -1,5 +1,3 @@
-// components/EditGoalModal.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -92,109 +90,112 @@ export default function EditGoalModal({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="flex flex-col h-[calc(100vh-750px)]">
-        <AlertDialogHeader>
+      {/* Make the modal a flex container and align items to the start */}
+      <AlertDialogContent className="sm:max-w-lg h-[580px] flex flex-col justify-start">
+        <AlertDialogHeader
+            className="flex items-start justify-center"
+        >
           <h2 className="text-xl font-semibold">Edit Goal</h2>
         </AlertDialogHeader>
-        {/* Formularz edycji celu */}
-        <div className="flex flex-col space-y-4 py-4">
-          <div>
-            <Label htmlFor="goal-select" className="mb-1">
-              Select Goal
-            </Label>
-            <Select
-              value={selectedGoalId}
-              onValueChange={handleGoalSelect}
-            >
-              <SelectTrigger id="goal-select">
-                <SelectValue placeholder="Select Goal" />
-              </SelectTrigger>
-              <SelectContent>
-                {goals
-                  .filter((goal) => goal.status === "Active")
-                  .map((goal) => (
-                    <SelectItem key={goal.id} value={goal.id}>
-                      {goal.title}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedGoalId && (
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label htmlFor="title" className="mb-1">
-                  Title
-                </Label>
-                <Input
-                  type="text"
-                  id="title"
-                  placeholder="Title of the goal"
-                  value={editFormData.title}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      title: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="deadline" className="mb-1">
-                  Deadline
-                </Label>
-                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
-                      {editFormData.deadline
-                        ? format(editFormData.deadline, "PPP")
-                        : "Pick a date"}
-                      <CalendarIcon className="h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={editFormData.deadline}
-                      onSelect={(date) => {
-                        setEditFormData({
-                          ...editFormData,
-                          deadline: date || new Date(),
-                        });
-                        setCalendarOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label htmlFor="description" className="mb-1">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Description for your goal"
-                  value={editFormData.description}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      description: e.target.value,
-                    })
-                  }
-                  rows={5}
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleEditSubmit}
-                  disabled={!selectedGoalId}
-                >
-                  Save changes
-                </Button>
-              </div>
+        {/* Allow the content area to grow and remove extra padding */}
+        <div className="overflow-y-auto flex-grow">
+          {/* Formularz edycji celu */}
+          <div className="flex flex-col space-y-4 p-2">
+            <div>
+              <Label htmlFor="goal-select" className="mb-1">
+                Select Goal
+              </Label>
+              <Select value={selectedGoalId} onValueChange={handleGoalSelect}>
+                <SelectTrigger id="goal-select">
+                  <SelectValue placeholder="Select Goal" />
+                </SelectTrigger>
+                <SelectContent>
+                  {goals
+                    .filter((goal) => goal.status === "Active")
+                    .map((goal) => (
+                      <SelectItem key={goal.id} value={goal.id}>
+                        {goal.title}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
+            {selectedGoalId && (
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="title" className="mb-1">
+                    Title
+                  </Label>
+                  <Input
+                    type="text"
+                    id="title"
+                    placeholder="Title of the goal"
+                    value={editFormData.title}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        title: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="deadline" className="mb-1">
+                    Deadline
+                  </Label>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        {editFormData.deadline
+                          ? format(editFormData.deadline, "PPP")
+                          : "Pick a date"}
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={editFormData.deadline}
+                        onSelect={(date) => {
+                          setEditFormData({
+                            ...editFormData,
+                            deadline: date || new Date(),
+                          });
+                          setCalendarOpen(false);
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Label htmlFor="description" className="mb-1">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Description for your goal"
+                    value={editFormData.description}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        description: e.target.value,
+                      })
+                    }
+                    rows={7}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleEditSubmit} disabled={!selectedGoalId}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <AlertDialogCancel className="absolute top-4 right-4">
           Cancel
