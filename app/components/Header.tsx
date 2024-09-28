@@ -12,12 +12,8 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -57,7 +53,7 @@ function Header() {
   };
 
   return (
-    <header className="w-full flex items-center justify-between pb-0 p-6 h-20 shadow-md relative">
+    <header className="w-full flex items-center justify-between p-6 h-20 shadow-md relative">
       {/* Logo or Branding */}
       <div className="flex-shrink-0">
         <Link href="/" className="text-xl font-bold">

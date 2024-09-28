@@ -33,7 +33,7 @@ export default function Parameters() {
 
   return (
     <Card className="grid border-none col-span-3 grid-rows[1fr,1fr,auto]">
-      <div className="p-4">
+      <div>
         <ParametersList
           parameters={parameters}
           onDelete={fetchParameters}
