@@ -27,6 +27,7 @@ import {
 
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"; // Import Navigation Menu styles
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -103,6 +104,15 @@ function Header() {
           showBar={false}
           className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none"
         >
+          {/* Button to close the menu */}
+          <Button
+            onClick={toggleMobileMenu}
+            className="absolute top-0 right-0 m-4"
+            variant="outline"
+          >
+            Close
+          </Button>
+
           <div className="w-full p-5 h-full flex flex-col gap-4 items-center justify-center">
             {routes.map((route) => (
               <Card
@@ -114,7 +124,6 @@ function Header() {
                   className="flex items-center justify-center space-x-2"
                   onClick={toggleMobileMenu}
                 >
-                  {" "}
                   {route.icon}
                   <span>{route.name}</span>
                 </Link>

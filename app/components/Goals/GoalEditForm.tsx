@@ -85,7 +85,7 @@ export default function GoalEditForm({
   };
 
   return (
-    <Card className="w-full hidden lg:flex lg:w-1/2 flex-col">
+    <Card className="w-full flex lg:w-1/2 flex-col">
       <CardHeader className="grid grid-cols-2 space-y-0 h-20">
         <h2 className="text-xl font-semibold">Edit Goal</h2>
         <Select value={selectedGoalId} onValueChange={handleGoalSelect}>

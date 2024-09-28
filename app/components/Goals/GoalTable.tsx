@@ -3,7 +3,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { pl, enUS } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { IGoal } from "@/app/types/Goal";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,23 +20,30 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"; // Import Select components
+} from "@/components/ui/select";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import AddGoalModal from "@/app/components/Goals/AddGoalModal";
+import EditGoalModal from "@/app/components/Goals/EditGoalModal";
 
 type GoalTableProps = {
   goals: IGoal[];
   onDelete: (id: string) => void;
   onReset: (id: string) => void;
+  onCreateGoal: (data: any) => void;
+  onEdit: (data: any, id: string) => void;
 };
 
 export default function GoalTable({
   goals,
   onDelete,
   onReset,
+  onCreateGoal,
+  onEdit,
 }: GoalTableProps) {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("all"); // New state for filter
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const filteredGoals = goals.filter((goal) => {
     const matchesSearch = goal.title
@@ -60,99 +67,19 @@ export default function GoalTable({
     );
   });
 
-  const formattedDescription = (description: string) => {
-    return description.length > 50
-      ? description.slice(0, 50) + "..."
-      : description;
-  };
-  const formattedMobileDescription = (description: string) => {
-    return description.length > 100
-      ? description.slice(0, 100) + "..."
-      : description;
-  };
-
   return (
     <>
-      <Card className="h-full hidden">
-        <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0">
-          <h2 className="text-xl font-semibold">Goals</h2>
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
-            {/* Search Input */}
-            <Input
-              type="text"
-              placeholder="Search goals"
-              className="w-56 md:w-72 xl:w-96"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {/* Filter Select */}
-            <Select
-              value={filter}
-              onValueChange={(value) =>
-                setFilter(value as "all" | "active" | "completed")
-              }
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-9 gap-4 space-y-2 border-border border-b-2 py-2">
-            <div className="col-span-1">Title</div>
-            <div className="col-span-3">Description</div>
-            <div className="col-span-1">Status</div>
-            <div className="col-span-2">Deadline</div>
-            <div className="col-span-1">Delete</div>
-            <div className="col-span-1">Reset Status</div>
-          </div>
-          <ScrollArea className="h-[calc(100vh-650px)] w-full">
-            {filteredGoals.map((goal) => (
-              <div
-                key={goal.id}
-                className="grid grid-cols-9 gap-4 border-border border-b py-2 items-center"
-              >
-                <div className="col-span-1">{goal.title}</div>
-                <div className="col-span-3" title={goal.description}>
-                  {formattedDescription(goal.description as string)}
-                </div>
-                <div className="col-span-1">{goal.status}</div>
-                <div className="col-span-2">
-                  {format(new Date(goal.deadline), "PPP", { locale: enUS })}
-                </div>
-                <div className="col-span-1">
-                  <Button onClick={() => onDelete(goal.id)}>Delete</Button>
-                </div>
-                <div className="col-span-1">
-                  <Button
-                    disabled={goal.status.toLowerCase() === "active"}
-                    onClick={() => onReset(goal.id)}
-                  >
-                    Reset
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-      <Card className="">
-        <CardHeader className="flex flex-row justify-between space-y-0">
-          <h2 className="text-xl font-semibold">Goals</h2>
+      <Card className="h-full border-0 lg:border-[1px] lg:border-border">
+        <CardHeader className="flex flex-row lg:justify-between justify-end space-y-0 px-0 lg:p-6">
+          <h2 className="hidden lg:block text-xl font-semibold">Goals</h2>
 
-          <div className="flex justify-end w-1/2 gap-4">
+          <div className="flex justify-end w-full lg:w-1/2 gap-4">
             <Input
               type="text"
               placeholder="Search goals"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-56"
+              className="w-2/3 lg:w-56"
             />
             <Select
               value={filter}
@@ -160,7 +87,7 @@ export default function GoalTable({
                 setFilter(value as "all" | "active" | "completed")
               }
             >
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-1/3 lg:w-40">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
@@ -171,8 +98,8 @@ export default function GoalTable({
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[calc(70vh-250px)] w-full p-4">
+        <CardContent className="p-0 lg:p-6">
+          <ScrollArea className="lg:h-[calc(70vh-250px)] w-full p-0 lg:p-4">
             <ScrollBar />
             <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
               {filteredGoals.map((goal) => (
@@ -218,6 +145,29 @@ export default function GoalTable({
           </ScrollArea>
         </CardContent>
       </Card>
+
+      {/* Przyciski do otwierania modali na urządzeniach mobilnych */}
+      <div className="fixed bottom-4 left-4 lg:hidden">
+        <Button onClick={() => setAddDialogOpen(true)}>Add Goal</Button>
+      </div>
+      <div className="fixed bottom-4 right-4 lg:hidden">
+        <Button onClick={() => setEditDialogOpen(true)}>Edit</Button>
+      </div>
+
+      {/* Modal dodawania celu */}
+      <AddGoalModal
+        isOpen={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onCreateGoal={onCreateGoal}
+      />
+
+      {/* Modal edycji celu */}
+      <EditGoalModal
+        isOpen={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        goals={goals}
+        onEdit={onEdit}
+      />
     </>
   );
 }

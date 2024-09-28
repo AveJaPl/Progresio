@@ -26,7 +26,7 @@ export default function Statistics() {
           </div>
         </div>
         <div>
-          <p>Your parameter progress:</p>
+          <p>Your habits progress:</p>
           <Progress value={parameterProgress} className="w-full mt-2" />
           <p className="text-sm text-gray-500 mt-1">
             {parameterProgress.toFixed(2)}% finished

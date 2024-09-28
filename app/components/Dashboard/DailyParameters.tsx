@@ -150,7 +150,7 @@ export default function DailyParameters() {
   return (
     <Card className="flex flex-col col-span-3">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Your Daily Parameters</CardTitle>
+        <CardTitle>Your Habits</CardTitle>
         <div className="w-52">
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>

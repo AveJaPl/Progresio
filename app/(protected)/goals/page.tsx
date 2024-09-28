@@ -143,13 +143,13 @@ export default function Goals() {
   return (
     <div className="space-y-4">
       {/* Formularz dodawania nowego celu */}
-      <div className="flex w-full flex-col lg:flex-row gap-4">
+      <div className="hidden lg:flex w-full flex-col lg:flex-row gap-4">
         <GoalForm onSubmit={addGoal} />
         <GoalEditForm goals={goals} onSubmit={editGoal} loading={loading} />
       </div>
 
       {/* Tabela z listą celów */}
-      <GoalTable goals={goals} onDelete={deleteGoal} onReset={handleResetStatus} />
+      <GoalTable goals={goals} onDelete={deleteGoal} onReset={handleResetStatus} onCreateGoal={addGoal} onEdit={editGoal} />
     </div>
   );
 
