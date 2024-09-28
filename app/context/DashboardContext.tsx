@@ -123,12 +123,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const activeGoals = data.filter((goal: IGoal) => goal.status === "Active");
     const goalsThisWeek = data.filter((goal: IGoal) => {
+      // set monday do 2024 09 30
       const monday = new Date();
-      monday.setHours(0, 0, 0, 0);
-      monday.setDate(monday.getDate() - monday.getDay() + 1);
-      const sunday = new Date();
-      sunday.setHours(23, 59, 59, 999);
-      sunday.setDate(sunday.getDate() - sunday.getDay() + 7);
+      switch (monday.getDay()) {
+        case 0:
+          monday.setDate(monday.getDate() - 6);
+          break;
+        default:
+          monday.setDate(monday.getDate() - monday.getDay() + 1);
+      }
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 6);
+
       const goalDate = new Date(goal.deadline);
       return goalDate >= monday && goalDate <= sunday;
     });
@@ -186,8 +192,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         });
         refreshUpcomingGoals();
         refreshGoals();
-        // odswiez activites
-        // odswiez goal progress
       } else {
         toast({
           title: "Error",

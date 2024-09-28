@@ -91,7 +91,7 @@ export default function EditGoalModal({
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       {/* Make the modal a flex container and align items to the start */}
-      <AlertDialogContent className="sm:max-w-lg h-[580px] flex flex-col justify-start">
+      <AlertDialogContent className="sm:max-w-lg h-screen sm:h-[580px] flex flex-col justify-start pt-20">
         <AlertDialogHeader
             className="flex items-start justify-center"
         >
