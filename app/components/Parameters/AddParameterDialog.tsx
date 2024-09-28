@@ -95,14 +95,14 @@ export default function AddParameterDialog({
     <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <AlertDialogTrigger asChild>
         <Button variant="default" onClick={() => setDialogOpen(true)}>
-          Add Parameter
+          Add Habit
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="p-6 space-y-6">
         <AlertDialogHeader className="space-y-4">
           <Card className="border-none shadow-lg">
             <CardHeader className="mb-6 p-4 pt-2 border-border border-b-2">
-              <CardTitle>Add Parameter</CardTitle>
+              <CardTitle>Add Habit</CardTitle>
             </CardHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -113,7 +113,7 @@ export default function AddParameterDialog({
                     name="name"
                     render={({ field }) => (
                       <FormItem className="col-span-2">
-                        <FormLabel>Parameter Name</FormLabel>
+                        <FormLabel>Habit Name</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g., Water [L]" {...field} />
                         </FormControl>

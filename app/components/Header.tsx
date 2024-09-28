@@ -11,7 +11,7 @@ function Header() {
   const routes = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Goals", href: "/goals" },
-    { name: "Parameters", href: "/parameters" },
+    { name: "Habits", href: "/habits" },
     { name: "Stats", href: "/stats" },
     { name: "Settings", href: "/settings" },
   ];

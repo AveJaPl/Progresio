@@ -109,7 +109,7 @@ export default function GoalForm({
               rows={5}
             />
           </div>
-          <div className="flex justify-end items-end">
+          <div className="col-span-2 xl:col-span-1 flex justify-end items-end">
             <Button onClick={handleSubmit}>Create goal</Button>
           </div>
         </div>

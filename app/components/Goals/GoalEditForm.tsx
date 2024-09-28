@@ -155,7 +155,7 @@ export default function GoalEditForm({
                 rows={5}
               />
             </div>
-            <div className="flex justify-end items-end">
+            <div className="flex justify-end items-end col-span-2 xl:col-span-1">
               <Button
                 onClick={() => {
                   handleSubmit();

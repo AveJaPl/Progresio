@@ -166,9 +166,9 @@ export default function ParametersList({
   return (
     <>
       <CardHeader className="flex flex-row items-center justify-between px-0 py-4">
-        <CardTitle className="hidden xl:block">Parameters</CardTitle>
+        <CardTitle className="hidden xl:block">Habits</CardTitle>
         <Input
-          placeholder="Search parameters"
+          placeholder="Search habits"
           className="w-full xl:w-80"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -179,7 +179,7 @@ export default function ParametersList({
           <Card
             key={parameter.id}
             className="grid hover:scale-[1.01] cursor-pointer"
-            onClick={() => router.push(`/parameters/${parameter.id}`)}
+            onClick={() => router.push(`/habits/${parameter.id}`)}
           >
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{parameter.name}</CardTitle>
