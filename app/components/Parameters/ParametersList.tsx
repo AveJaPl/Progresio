@@ -218,7 +218,7 @@ export default function ParametersList({
           <AlertDialogHeader className="space-y-4">
             <Card className="border-none shadow-lg">
               <CardHeader className="mb-6 p-4 pt-2 border-border border-b-2">
-                <CardTitle>Edit Parameter</CardTitle>
+                <CardTitle>Edit Habit</CardTitle>
               </CardHeader>
               {selectedParameter && (
                 <Form {...form}>
@@ -230,7 +230,7 @@ export default function ParametersList({
                         name="name"
                         render={({ field }) => (
                           <FormItem className="col-span-2">
-                            <FormLabel>Parameter Name</FormLabel>
+                            <FormLabel>Habit Name</FormLabel>
                             <FormControl>
                               <Input placeholder="e.g., Water [L]" {...field} />
                             </FormControl>

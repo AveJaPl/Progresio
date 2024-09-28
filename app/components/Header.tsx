@@ -1,39 +1,129 @@
+import { useState } from "react";
+import Link from "next/link";
+import {
+  FaBars,
+  FaTimes,
+  FaTachometerAlt,
+  FaBullseye,
+  FaClipboardList,
+  FaChartBar,
+  FaCog,
+} from "react-icons/fa";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   NavigationMenu,
+  NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import Link from "next/link";
+} from "@/components/ui/navigation-menu"; // Import Navigation Menu components
+
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"; // Import Navigation Menu styles
+import { Card } from "@/components/ui/card";
 
 function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const routes = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Goals", href: "/goals" },
-    { name: "Habits", href: "/habits" },
-    { name: "Stats", href: "/stats" },
-    { name: "Settings", href: "/settings" },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: <FaTachometerAlt className="h-6 w-6" />,
+    },
+    { name: "Goals", href: "/goals", icon: <FaBullseye className="h-6 w-6" /> },
+    {
+      name: "Habits",
+      href: "/habits",
+      icon: <FaClipboardList className="h-6 w-6" />,
+    },
+    { name: "Stats", href: "/stats", icon: <FaChartBar className="h-6 w-6" /> },
+    {
+      name: "Settings",
+      href: "/settings",
+      icon: <FaCog className="h-6 w-6" />,
+    },
   ];
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen((prev) => !prev);
+  };
+
   return (
-    <div className="relative w-full flex items-center p-6 h-20 outline outline-2 outline-border">
-      <NavigationMenu className="absolute left-1/2 transform -translate-x-1/2">
-        <NavigationMenuList className="flex space-x-4">
-          {routes.map((route, index) => (
-            <NavigationMenuItem key={index}>
-              <Link href={route.href} legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  {route.name}
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
-      {/* Przycisk po prawej stronie */}
-      <div className="ml-auto">
+    <header className="w-full flex items-center justify-between pb-0 p-6 h-20 shadow-md relative">
+      {/* Logo or Branding */}
+      <div className="flex-shrink-0">
+        <Link href="/" className="text-xl font-bold">
+          MyApp
+        </Link>
       </div>
-    </div>
+
+      {/* Desktop Navigation */}
+      <nav className="hidden md:block">
+        <NavigationMenu>
+          <NavigationMenuList className="flex space-x-6">
+            {routes.map((route) => (
+              <NavigationMenuItem key={route.name}>
+                <Link href={route.href}>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    {route.name}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+      </nav>
+      <div className="hidden md:block"></div>
+
+      {/* Hamburger Menu for Mobile */}
+      <div className="md:hidden">
+        <button onClick={toggleMobileMenu} aria-label="Toggle navigation menu">
+          {isMobileMenuOpen ? (
+            <FaTimes className="h-6 w-6" aria-hidden="true" />
+          ) : (
+            <FaBars className="h-6 w-6" aria-hidden="true" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        onOpenChange={setIsMobileMenuOpen}
+        open={isMobileMenuOpen}
+        direction="right"
+      >
+        <DrawerContent
+          showBar={false}
+          className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none"
+        >
+          <div className="w-full p-5 h-full flex flex-col gap-4 items-center justify-center">
+            {routes.map((route) => (
+              <Card
+                key={route.name}
+                className="w-3/4 flex items-center justify-center p-4"
+              >
+                <Link
+                  href={route.href}
+                  className="flex items-center justify-center space-x-2"
+                  onClick={toggleMobileMenu}
+                >
+                  {" "}
+                  {route.icon}
+                  <span>{route.name}</span>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </header>
   );
 }
 
