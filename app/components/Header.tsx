@@ -57,7 +57,7 @@ function Header() {
       {/* Logo or Branding */}
       <div className="flex-shrink-0">
         <Link href="/" className="text-xl font-bold">
-          MyApp
+          Aurora
         </Link>
       </div>
 

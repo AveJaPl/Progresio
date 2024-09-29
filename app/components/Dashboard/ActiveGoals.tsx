@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox"; // import Checkbox from shadcn UI
 import { Label } from "@/components/ui/label"; // optional for better accessibility
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,9 +35,9 @@ export default function GoalsList() {
       <CardHeader>
         <CardTitle>Your Active Goals</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-between">
+      <CardContent className="flex flex-col justify-between p-4">
         <ul>
-          <ScrollArea className="h-80 w-full">
+          <ScrollArea className="h-[400px] w-full">
             {loadingGoals ? (
               <Loading />
             ) : goals.length === 0 ? (
@@ -66,17 +66,18 @@ export default function GoalsList() {
             )}
           </ScrollArea>
         </ul>
-        <div className="flex justify-end">
-          <Button
-            variant="default"
-            className="mt-4"
-            disabled={Object.values(completedGoals).every((value) => !value)}
-            onClick={() => handleSubmit()}
-          >
-            Submit
-          </Button>
-        </div>
+       
       </CardContent>
-    </Card>
+      <CardFooter className="flex justify-end">
+         <Button
+           variant="default"
+           className="mt-4"
+           disabled={Object.values(completedGoals).every((value) => !value)}
+           onClick={() => handleSubmit()}
+         >
+           Submit
+         </Button>
+      </CardFooter>
+</Card>
   );
 }

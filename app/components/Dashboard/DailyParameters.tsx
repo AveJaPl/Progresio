@@ -21,7 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import {
   Popover,
   PopoverTrigger,
@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import Loading from "@/app/components/loading";
 import { useAppContext } from "@/app/context/DashboardContext";
+import { CheckCircle, Hash, TextCursorInput } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function DailyParameters() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
@@ -71,8 +73,7 @@ export default function DailyParameters() {
   useEffect(() => {
     setLoading(true);
 
-    fetchParameters();
-    setLoading(false);
+    fetchParameters().then(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (
@@ -98,8 +99,8 @@ export default function DailyParameters() {
       title: status === 200 ? "Success" : "Error",
       description:
         status === 200
-          ? "Parameter added successfully"
-          : "Failed to add parameters",
+          ? "Parameters have been successfully added."
+          : "Failed to add parameters.",
     });
     return;
   };
@@ -149,16 +150,20 @@ export default function DailyParameters() {
 
   return (
     <Card className="flex flex-col col-span-3">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between py-3">
         <CardTitle>Your Habits</CardTitle>
         <div className="sm:w-52">
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="sm:w-full sm:justify-between">
-                <span 
-                  className="hidden sm:flex"
-                >
+              <Button
+                variant="outline"
+                className="sm:w-full sm:justify-between flex gap-4 sm:gap-0"
+              >
+                <span className="hidden sm:flex">
                   {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                </span>
+                <span className="flex sm:hidden">
+                  {formData.date ? format(formData.date, "P") : "Pick a date"}
                 </span>
                 <CalendarIcon className="h-6 w-6 sm:h-4 sm:w-4 opacity-50" />
               </Button>
@@ -176,75 +181,91 @@ export default function DailyParameters() {
           </Popover>
         </div>
       </CardHeader>
-      <CardContent className="h-full p-4 flex flex-row">
-        <div className="w-full xl:w-3/4 h-full grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {parameters.map((parameter) => {
-            const paramData = formData.data.find(
-              (item) => item.id === parameter.id
-            );
+      <CardContent className="p-4">
+        <ScrollArea className="h-[400px]">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {parameters.map((parameter) => {
+              const paramData = formData.data.find(
+                (item) => item.id === parameter.id
+              );
 
-            return (
-              <Card key={parameter.id} className="mb-4 grid border-none">
-                <CardContent className="pb-0 space-y-2">
-                  <Label>{parameter.name}</Label>
-                  {parameter.type === "boolean" ? (
-                    <Select
-                      value={String(paramData?.value)}
-                      onValueChange={(value) =>
-                        handleInputChange(parameter.id, value === "true")
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Value" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Yes</SelectItem>
-                        <SelectItem value="false">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      type={parameter.type === "number" ? "number" : "text"}
-                      value={paramData?.value || ""}
-                      onChange={(e) => {
-                        handleInputChange(parameter.id, e.target.value);
-                      }}
-                      placeholder={
-                        parameter.type === "number"
-                          ? "Enter a number"
-                          : "Enter a value"
-                      }
-                      className="text-base sm:text-sm"
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+              return (
+                <Card key={parameter.id}>
+                  <CardHeader className="flex flex-row justify-start items-center space-y-0 gap-2 pb-4">
+                    {parameter.type === "boolean" && (
+                      <CheckCircle className="text-green-500 w-5 h-5" />
+                    )}
+                    {parameter.type === "number" && (
+                      <Hash className="text-blue-500 w-5 h-5" />
+                    )}
+                    {parameter.type === "string" && (
+                      <TextCursorInput className="text-purple-500 w-5 h-5" />
+                    )}
+                    <CardTitle>
+                      {parameter.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {parameter.type === "boolean" ? (
+                      <Select
+                        value={String(paramData?.value)}
+                        onValueChange={(value) =>
+                          handleInputChange(parameter.id, value === "true")
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select value" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        type={parameter.type === "number" ? "number" : "text"}
+                        value={paramData?.value || ""}
+                        onChange={(e) => {
+                          handleInputChange(parameter.id, e.target.value);
+                        }}
+                        placeholder={
+                          parameter.type === "number"
+                            ? "Enter a number"
+                            : "Enter a value"
+                        }
+                        className="w-full"
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </ScrollArea>
       </CardContent>
-      <CardFooter className="flex justify-end items-end">
+      <CardFooter className="flex justify-end p-4">
         <Button onClick={() => handleUpdate()}>Update</Button>
       </CardFooter>
       <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
         <AlertDialogContent className="p-6 space-y-6">
           <AlertDialogHeader className="space-y-4">
-            <Card className="border-none shadow-lg">
-              <CardHeader className="mb-6 p-4 pt-2 border-border border-b-2">
+            <Card className="bg-background">
+              <CardHeader className="p-4">
                 <CardTitle>Data Already Exists</CardTitle>
               </CardHeader>
               <CardContent>
                 Data for this date already exists. Do you want to overwrite it?
               </CardContent>
-              <CardFooter className="flex justify-end p-0 space-x-4">
+              <CardFooter className="flex justify-end p-4 space-x-4">
                 <AlertDialogCancel asChild>
                   <Button
+                    variant="outline"
                     onClick={() => {
                       setModalOpen(false);
                       toast({
                         variant: "default",
-                        title: "Ok!",
-                        description: "Data not overwritten",
+                        title: "Cancelled",
+                        description: "Data was not overwritten.",
                       });
                     }}
                   >
