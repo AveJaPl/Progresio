@@ -93,7 +93,6 @@ export default function GoalForm({
                     setFormData({ ...formData, deadline: date || new Date() });
                     setCalendarOpen(false);
                   }}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>

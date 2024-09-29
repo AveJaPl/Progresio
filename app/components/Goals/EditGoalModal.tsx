@@ -167,7 +167,7 @@ export default function EditGoalModal({
                           });
                           setCalendarOpen(false);
                         }}
-                        initialFocus
+                        
                       />
                     </PopoverContent>
                   </Popover>

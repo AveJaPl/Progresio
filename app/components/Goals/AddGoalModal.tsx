@@ -115,7 +115,6 @@ export default function AddGoalModal({
                       });
                       setCalendarOpen(false);
                     }}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

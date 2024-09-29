@@ -139,7 +139,6 @@ export default function GoalEditForm({
                       });
                       setCalendarOpen(false);
                     }}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

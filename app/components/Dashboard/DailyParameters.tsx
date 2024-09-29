@@ -171,7 +171,6 @@ export default function DailyParameters() {
                   setFormData({ ...formData, date: date || new Date() });
                   setCalendarOpen(false);
                 }}
-                initialFocus
               />
             </PopoverContent>
           </Popover>
