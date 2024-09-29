@@ -151,12 +151,16 @@ export default function DailyParameters() {
     <Card className="flex flex-col col-span-3">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Your Habits</CardTitle>
-        <div className="w-52">
+        <div className="sm:w-52">
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                {formData.date ? format(formData.date, "PPP") : "Pick a date"}
-                <CalendarIcon className="h-4 w-4 opacity-50" />
+              <Button variant="outline" className="sm:w-full sm:justify-between">
+                <span 
+                  className="hidden sm:flex"
+                >
+                  {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                </span>
+                <CalendarIcon className="h-6 w-6 sm:h-4 sm:w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
