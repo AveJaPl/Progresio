@@ -68,7 +68,7 @@ export default function AddGoalModal({
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       {/* Set fixed height and make the modal a flex container */}
-      <AlertDialogContent className="sm:max-w-lg h-[calc(100vh-100px)] sm:h-[500px] flex flex-col justify-start pt-20">
+      <AlertDialogContent className="sm:max-w-lg h-[calc(100vh-100px)] sm:h-[500px] flex flex-col justify-start pt-5">
         <AlertDialogHeader className="flex justify-center items-start">
           <h2 className="text-xl font-semibold">Create New Goal</h2>
         </AlertDialogHeader>
