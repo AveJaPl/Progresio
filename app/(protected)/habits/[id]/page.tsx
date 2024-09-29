@@ -3,59 +3,72 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import Loading from "@/app/components/loading";
+import { Parameter } from "@/app/types/Parameter";
+import { StreakResult } from "@/app/types/StreakResult";
+import { getData } from "@/app/utils/sendRequest";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ParameterWithCount } from "@/app/types/Parameter";
-import { calculateStreak } from "@/app/utils/calculateStreak";
-import { StreakResult } from "@/app/types/StreakResult";
+import { format } from "date-fns";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { Badge } from "@/components/ui/badge";
 
 export default function ParameterPage() {
   const { id } = useParams();
-  const [parameter, setParameter] = useState<ParameterWithCount | null>(null);
+  const [parameter, setParameter] = useState<Parameter | null>(null);
   const [loading, setLoading] = useState(true);
-  const [latestEntrySuccess, setLatestEntrySuccess] = useState<boolean | null>(
-    null
-  );
-  const [search, setSearch] = useState<string>("");
-  const [streakResult, setStreakResult] = useState<StreakResult>({
-    currentStreak: 0,
-    longestStreak: 0,
-    totalSuccesses: 0,
-    totalFailures: 0,
-    latestEntrySuccess: null,
+  const [search, setSearch] = useState("");
+
+  const { toast } = useToast();
+  const [stats, setStats] = useState({
+    Average: 0,
+    "Longest streak": 0,
+    "Current streak": 0,
+    Total: 0,
+    Fails: 0,
+    Successes: 0,
   });
 
-  useEffect(() => {
-    const fetchParameter = async () => {
-      try {
-        const response = await fetch(`/api/parameters/${id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch parameter");
-        }
-        const data: ParameterWithCount = await response.json();
-        setParameter(data || null);
-        if (data) {
-          setStreakResult(calculateStreak(data));
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
-    };
+  const fetchParameter = async () => {
+    const { status, data } = await getData(`/api/parameters/${id}`);
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch parameter",
+        variant: "destructive",
+      });
+      return;
+    }
+    console.log(data);
+    setParameter(data);
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchParameter();
   }, [id]);
+
+  // search for entries in parameter using date, name or value
+  const filteredEntries = parameter?.dataEntries.filter((entry) => {
+    const matchesSearch = entry.date
+      .toString()
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const valueMatchesSearch = entry.value
+      .toString()
+      .includes(search.toLowerCase());
+    return matchesSearch || valueMatchesSearch;
+  });
 
   if (loading) {
     return <Loading />;
@@ -69,162 +82,196 @@ export default function ParameterPage() {
     );
   }
 
-  // Sort and filter dataEntries based on search
-  const sortedEntries = [...parameter.dataEntries].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-
-  const filteredProgressData = sortedEntries.filter((entry) => {
-    // search by value and date
-    return (
-      entry.value.toLowerCase().includes(search.toLowerCase()) ||
-      new Date(entry.date).toLocaleDateString().includes(search)
-    );
-  });
+  const isSuccessForNumber = (value: number) => {
+    if (parameter.goalOperator === ">=") {
+      return value >= Number(parameter.goalValue);
+    } else if (parameter.goalOperator === "<=") {
+      return value <= Number(parameter.goalValue);
+    } else if (parameter.goalOperator === ">") {
+      return value > Number(parameter.goalValue);
+    } else if (parameter.goalOperator === "<") {
+      return value < Number(parameter.goalValue);
+    } else if (parameter.goalOperator === "=") {
+      return value === Number(parameter.goalValue);
+    }
+  };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row px-12 justify-between items-center">
-        <CardTitle className="text-2xl font-semibold">
-          {parameter.name}
-        </CardTitle>
-        <Badge variant="outline" className="bg-primary">
-          {parameter.type}
-        </Badge>
-      </CardHeader>
-      <CardContent>
-        {/* Statistics Blocks */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 rounded-lg text-center">
-            <h3 className="text-xl font-bold">Longest Streak</h3>
-            <p className="text-2xl font-semibold">
-              {streakResult.longestStreak}
-            </p>
-            <p className="text-gray-600">Times in a row</p>
-          </div>
-          <div className="p-4 rounded-lg text-center">
-            <h3 className="text-xl font-bold">Total Successes</h3>
-            <p className="text-2xl font-semibold">
-              {streakResult.totalSuccesses}
-            </p>
-            <p className="text-gray-600">Days achieved</p>
-          </div>
-          <div className="p-4 rounded-lg text-center">
-            <h3 className="text-xl font-bold">Total Failures</h3>
-            <p className="text-2xl font-semibold">
-              {streakResult.totalFailures}
-            </p>
-            <p className="text-gray-600">Days failed</p>
-          </div>
-        </div>
-
-        {/* Progress Table */}
-        <h2 className="text-lg font-semibold mb-4">Progress Entries</h2>
-        <div className="overflow-x-auto">
-          {sortedEntries.length > 0 ? (
-            <Card className="h-full">
-              <CardHeader className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Goals</h2>
-                <div className="w-full flex items-center justify-end">
-                  <Input
-                    type="text"
-                    placeholder="Search goals"
-                    className="w-1/3 text-base sm:text-sm"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
+    <div className="flex flex-col gap-4">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col sm:grid sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-9 gap-4 space-y-0">
+          {/* Here display general info about Parameter like name, type goal eg. >= 3000 */}
+          <div>
+            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
+              <CardHeader className="flex flex-row items-center p-0">
+                <CardTitle>Name:</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 gap-4 space-y-2 border-b-2 border-gray-300 py-2">
-                  <div className="col-span-2 font-medium">Date</div>
-                  <div className="col-span-1 font-medium">Value</div>
-                  <div className="col-span-1 font-medium">Status</div>
-                </div>
-                <ScrollArea className="h-80 w-full">
-                  {filteredProgressData.map((entry) => {
-                    // Determine success based on parameter's type and goal
-                    let isSuccess = false;
-                    const { goalOperator, goalValue, type } = parameter;
-                    let parsedGoalValue: number | string | boolean;
-
-                    if (type === "number") {
-                      parsedGoalValue = parseFloat(goalValue);
-                      const entryValue = parseFloat(entry.value);
-                      if (isNaN(parsedGoalValue) || isNaN(entryValue)) {
-                        isSuccess = false;
-                      } else {
-                        switch (goalOperator) {
-                          case ">=":
-                            isSuccess = entryValue >= parsedGoalValue;
-                            break;
-                          case "<=":
-                            isSuccess = entryValue <= parsedGoalValue;
-                            break;
-                          case "=":
-                            isSuccess = entryValue === parsedGoalValue;
-                            break;
-                          case ">":
-                            isSuccess = entryValue > parsedGoalValue;
-                            break;
-                          case "<":
-                            isSuccess = entryValue < parsedGoalValue;
-                            break;
-                          default:
-                            isSuccess = false;
-                        }
-                      }
-                    } else if (type === "boolean") {
-                      parsedGoalValue =
-                        goalValue.toLowerCase() === "yes" ? true : false;
-                      const entryValue =
-                        entry.value.toLowerCase() === "true" ? true : false;
-                      isSuccess = entryValue === parsedGoalValue;
-                    } else {
-                      // string type
-                      isSuccess = entry.value === goalValue;
-                    }
-
-                    return (
-                      <div
-                        key={entry.id}
-                        className="grid grid-cols-4 gap-4 space-y-2 border-b py-2"
-                      >
-                        <div className="col-span-2">
-                          {new Date(entry.date).toLocaleDateString()}
-                        </div>
-                        <div>{entry.value}</div>
-                        <div>
-                          <Badge
-                            variant={isSuccess ? "default" : "outline"}
-                            className="w-16 flex justify-center items-center"
-                          >
-                            {isSuccess ? "Success" : "Failed"}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </ScrollArea>
+              <CardContent className="flex flex-row items-center justify-center p-0">
+                <p>{parameter.name}</p>
               </CardContent>
             </Card>
-          ) : (
-            <p>No progress entries available.</p>
-          )}
-        </div>
-
-        {/* Latest entry status */}
-        {latestEntrySuccess !== null &&
-          (latestEntrySuccess ? (
-            <Alert className="mt-6" variant="default">
-              Congratulations! You achieved your goal in the last entry.
-            </Alert>
-          ) : (
-            <Alert className="mt-6" variant="destructive">
-              You missed your goal in the last entry. Keep pushing!
-            </Alert>
+          </div>
+          <div className="hidden lg:block col-span-3 2xl:col-span-6"></div>
+          <div>
+            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
+              <CardHeader className="flex flex-row items-center p-0">
+                <CardTitle>Type:</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row items-center justify-center p-0">
+                <p>{parameter.type}</p>
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
+              <CardHeader className="flex flex-row items-center p-0">
+                <CardTitle>Goal</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row gap-2 p-0">
+                <div>{parameter.goalOperator}</div>
+                <div>{parameter.goalValue}</div>
+              </CardContent>
+            </Card>
+          </div>
+        </CardHeader>
+        <CardContent className="hidden sm:grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-4">
+          {/* Here display averages, longest streak etc (stats) in cards*/}
+          {Object.entries(stats).map(([key, value]) => (
+            <Card className="flex flex-col items-center" key={key}>
+              <CardHeader>
+                <CardTitle>{key}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{value}</p>
+              </CardContent>
+            </Card>
           ))}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <Card className="w-full">
+        <CardHeader className="flex flex-row space-y-0 items-center justify-between">
+          <CardTitle>Habits</CardTitle>
+          <Input
+            type="text"
+            placeholder="Search habits"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-2/3 lg:w-56 text-base sm:text-sm"
+          />
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[calc(70vh-400px)]">
+            <div className="grid grid-cols-1 gap-4">
+              {filteredEntries.length === 0 ? (
+                <div className="text-muted-foreground text-center col-span-3">
+                  No habits found
+                </div>
+              ) : (
+                filteredEntries.map((entry) => (
+                  <Card
+                    key={entry.id}
+                    className="grid grid-cols-3 sm:flex sm:flex-row sm:items-center"
+                  >
+                    <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2">
+                      <CardHeader className="sm:space-y-0">
+                        <Button
+                          variant="outline"
+                          className="flex flex-row items-center"
+                          disabled
+                        >
+                          <span className="hidden md:flex">
+                            {entry.date
+                              ? format(entry.date, "PPP")
+                              : "Pick a date"}
+                          </span>
+                          <span className="flex md:hidden">
+                            {entry.date
+                              ? format(entry.date, "P")
+                              : "Pick a date"}
+                          </span>
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <Card className="flex flex-row items-center justify-between p-4 sm:p-1 sm:justify-center rounded-md">
+                          <CardHeader className="p-0">
+                            <CardTitle className="p-0 text-muted-foreground">
+                              Value: {entry.value}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-0">
+                            <div>
+                              {parameter.type === "boolean" ? (
+                                <div className="flex flex-row items-center gap-2">
+                                  <Badge
+                                    variant={
+                                      entry.value == "true"
+                                        ? "default"
+                                        : "destructive"
+                                    }
+                                    className="w-16 flex items-center justify-center"
+                                  >
+                                    {entry.value == "true" ? "Success" : "Fail"}
+                                  </Badge>
+                                </div>
+                              ) : parameter.type === "number" ? (
+                                <div className="flex flex-row items-center gap-2">
+                                  <Badge
+                                    variant={
+                                      isSuccessForNumber(Number(entry.value))
+                                        ? "default"
+                                        : "destructive"
+                                    }
+                                    className="w-16 flex items-center justify-center"
+                                  >
+                                    {isSuccessForNumber(Number(entry.value))
+                                      ? "Success"
+                                      : "Fail"}
+                                  </Badge>
+                                </div>
+                              ) : parameter.type === "string" ? (
+                                <div className="flex flex-row items-center gap-2">
+                                  <Badge
+                                    variant={
+                                      entry.value === parameter.goalValue
+                                        ? "default"
+                                        : "destructive"
+                                    }
+                                    className="w-16 flex items-center justify-center"
+                                  >
+                                    {entry.value === parameter.goalValue
+                                      ? "Success"
+                                      : "Fail"}
+                                  </Badge>
+                                </div>
+                              ) : null}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </CardContent>
+                    </div>
+                    <CardFooter className="flex flex-col items-end justify-end gap-4 sm:flex-row">
+                      <Button
+                        variant="secondary"
+                        className="flex flex-row items-center"
+                        onClick={() => console.log("Simulate edit")}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex flex-row items-center"
+                        onClick={() => console.log("Simulate delete")}
+                      >
+                        Delete
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

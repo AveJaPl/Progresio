@@ -10,7 +10,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     <ProtectedRoute>
       <div className="h-screen flex flex-col">
         <Header />
-        <main className="flex-grow px-4 xl:px-6">{children}</main>
+        <main className="flex-grow px-4 pb-4 xl:px-6 xl:pb-6">{children}</main>
       </div>
     </ProtectedRoute>
   );
