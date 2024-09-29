@@ -122,33 +122,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const activeGoals = data.filter((goal: IGoal) => goal.status === "Active");
-    const goalsThisWeek = data.filter((goal: IGoal) => {
-      // set monday do 2024 09 30
-      const monday = new Date();
-      switch (monday.getDay()) {
-        case 0:
-          monday.setDate(monday.getDate() - 6);
-          break;
-        default:
-          monday.setDate(monday.getDate() - monday.getDay() + 1);
-      }
-      const sunday = new Date(monday);
-      sunday.setDate(sunday.getDate() + 6);
-
-      const goalDate = new Date(goal.deadline);
-      return goalDate >= monday && goalDate <= sunday;
-    });
-
-    const completedGoalsThisWeek = goalsThisWeek.filter(
-      (goal: IGoal) => goal.status === "Completed"
-    );
-
-    setGoalProgress({
-      finished: completedGoalsThisWeek.length,
-      total: goalsThisWeek.length,
-    });
+  
     setGoals(activeGoals);
     setLoadingGoals(false);
+    setLoadingProgress(false);
+  };
+
+  const fetchParametersProgressThisWeek = async () => {
+    setLoadingProgress(true);
+    const { status, data } = await getData("/api/parameters/this-week");
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch parameters progress",
+        variant: "destructive",
+      });
+      return;
+    }
+    console.log("Habit Progress:");
+    console.log(data);
+    setParametersProgress(data);
+    setLoadingProgress(false);
+  };
+
+  const fetchGoalsProgressThisWeek = async () => {
+    setLoadingProgress(true);
+    const { status, data } = await getData("/api/goals/this-week");
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch goals progress",
+        variant: "destructive",
+      });
+      return;
+    }
+    console.log("Goal Progress:");
+    console.log(data);
+    setGoalProgress(data);
     setLoadingProgress(false);
   };
 
@@ -156,7 +166,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     fetchGoals();
     fetchUpcomingGoals();
     fetchParameters();
-    fetchActivities();
+    fetchParametersProgressThisWeek();
+    fetchGoalsProgressThisWeek();
+    // fetchActivities();
   }, []);
 
   const refreshUpcomingGoals = () => {
@@ -165,10 +177,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshGoals = () => {
     fetchGoals();
+    fetchGoalsProgressThisWeek();
   };
 
   const refreshParameters = () => {
     fetchParameters();
+    fetchParametersProgressThisWeek();
   };
 
   const activities = [
