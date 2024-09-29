@@ -79,7 +79,7 @@ export default function GoalTable({
               placeholder="Search goals"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-2/3 lg:w-56"
+              className="w-2/3 lg:w-56 text-base sm:text-sm"
             />
             <Select
               value={filter}

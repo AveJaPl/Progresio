@@ -115,7 +115,7 @@ export default function AddParameterDialog({
                       <FormItem className="col-span-2">
                         <FormLabel>Habit Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Water [L]" {...field} />
+                          <Input placeholder="e.g., Water [L]" {...field} className="text-base sm:text-sm" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -226,6 +226,7 @@ export default function AddParameterDialog({
                                   : "text"
                               }
                               {...field}
+                              className="text-base sm:text-sm"
                             />
                           </FormControl>
                           <FormMessage />

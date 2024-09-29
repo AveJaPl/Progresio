@@ -137,6 +137,7 @@ export default function EditGoalModal({
                         title: e.target.value,
                       })
                     }
+                    className="text-base sm:text-sm"
                   />
                 </div>
                 <div>
@@ -185,6 +186,7 @@ export default function EditGoalModal({
                         description: e.target.value,
                       })
                     }
+                    className="text-base sm:text-sm"
                     rows={7}
                   />
                 </div>

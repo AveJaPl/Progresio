@@ -215,6 +215,7 @@ export default function DailyParameters() {
                           ? "Enter a number"
                           : "Enter a value"
                       }
+                      className="text-base sm:text-sm"
                     />
                   )}
                 </CardContent>

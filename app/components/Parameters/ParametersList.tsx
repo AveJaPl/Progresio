@@ -169,7 +169,7 @@ export default function ParametersList({
         <CardTitle className="hidden xl:block">Habits</CardTitle>
         <Input
           placeholder="Search habits"
-          className="w-full xl:w-80"
+          className="w-full xl:w-80 text-base sm:text-sm"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -232,7 +232,7 @@ export default function ParametersList({
                           <FormItem className="col-span-2">
                             <FormLabel>Habit Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., Water [L]" {...field} />
+                              <Input placeholder="e.g., Water [L]" {...field} className="text-base sm:text-sm"/>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -356,6 +356,7 @@ export default function ParametersList({
                                           : "text"
                                       }
                                       {...field}
+                                      className="text-base sm:text-sm"
                                     />
                                   </FormControl>
                                   <FormMessage />

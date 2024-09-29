@@ -113,6 +113,7 @@ export default function AuthPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
+                className="text-base sm:text-sm"
               />
             </div>
             <div className="grid gap-2 relative">
@@ -125,6 +126,7 @@ export default function AuthPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 required
+                className="text-base sm:text-sm"
               />
               <button
                 type="button"
@@ -145,6 +147,7 @@ export default function AuthPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   required
+                  className="text-base sm:text-sm"
                 />
                 <button
                   type="button"

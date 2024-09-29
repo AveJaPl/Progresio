@@ -129,7 +129,7 @@ export default function ParameterPage() {
                   <Input
                     type="text"
                     placeholder="Search goals"
-                    className="w-1/3"
+                    className="w-1/3 text-base sm:text-sm"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />

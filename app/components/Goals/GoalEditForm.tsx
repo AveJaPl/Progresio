@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function GoalEditForm({
   goals,
   onSubmit,
-  loading
+  loading,
 }: {
   goals: IGoal[];
   onSubmit: (data: GoalFormEditData, id: string) => void;
@@ -90,7 +90,7 @@ export default function GoalEditForm({
         <h2 className="text-xl font-semibold">Edit Goal</h2>
         <Select value={selectedGoalId} onValueChange={handleGoalSelect}>
           <SelectTrigger id="goal">
-            <SelectValue placeholder= {loading ? "Loading..." : "Select Goal"} />
+            <SelectValue placeholder={loading ? "Loading..." : "Select Goal"} />
           </SelectTrigger>
           <SelectContent>
             {filteredGoals.map((goal) => (
@@ -114,6 +114,7 @@ export default function GoalEditForm({
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
+                className="text-base sm:text-sm"
               />
             </div>
             <div>
@@ -153,6 +154,7 @@ export default function GoalEditForm({
                   setFormData({ ...formData, description: e.target.value })
                 }
                 rows={5}
+                className="text-base sm:text-sm"
               />
             </div>
             <div className="flex justify-end items-end col-span-2 xl:col-span-1">

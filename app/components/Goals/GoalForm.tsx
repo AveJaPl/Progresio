@@ -71,6 +71,7 @@ export default function GoalForm({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
+              className="text-base sm:text-sm"
             />
           </div>
           <div>
@@ -107,6 +108,7 @@ export default function GoalForm({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={5}
+              className="text-base sm:text-sm"
             />
           </div>
           <div className="col-span-2 xl:col-span-1 flex justify-end items-end">

@@ -88,6 +88,7 @@ export default function AddGoalModal({
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
+                className="text-base sm:text-sm"
               />
             </div>
             <div>
@@ -134,6 +135,7 @@ export default function AddGoalModal({
                   })
                 }
                 rows={7}
+                className="text-base sm:text-sm"
               />
             </div>
             <div className="flex justify-end">
