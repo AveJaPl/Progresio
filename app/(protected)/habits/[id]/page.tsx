@@ -59,16 +59,14 @@ export default function ParameterPage() {
   }, [id]);
 
   // search for entries in parameter using date, name or value
-  const filteredEntries = parameter?.dataEntries.filter((entry) => {
-    const matchesSearch = entry.date
-      .toString()
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const valueMatchesSearch = entry.value
-      .toString()
-      .includes(search.toLowerCase());
-    return matchesSearch || valueMatchesSearch;
-  });
+  const filteredEntries = parameter?.dataEntries?.filter((entry) => {
+  const matchesSearch = entry.date
+    .toString()
+    .toLowerCase()
+    .includes(search.toLowerCase());
+  const valueMatchesSearch = entry.value.toString().includes(search.toLowerCase());
+  return matchesSearch || valueMatchesSearch;
+}) ?? [];
 
   if (loading) {
     return <Loading />;
