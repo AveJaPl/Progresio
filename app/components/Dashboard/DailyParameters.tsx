@@ -18,7 +18,6 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -59,20 +58,31 @@ export default function DailyParameters() {
       return;
     }
     setParameters(getResponse.data);
-    const initialFormData = getResponse.data.map((param: Parameter) => ({
+    updateFormDataForDate(new Date(), getResponse.data);
+  };
+
+  // Funkcja do aktualizacji formData dla wybranej daty
+  const updateFormDataForDate = (date: Date, params: Parameter[]) => {
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const initialFormData = params.map((param) => ({
       id: param.id,
-      value: param.type === "boolean" ? false : "",
+      value:
+        param.dataEntries.find(
+          (entry) =>
+            new Date(entry.date).toISOString() === targetDate.toISOString()
+        )?.value || "",
     }));
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      date: targetDate,
       data: initialFormData,
-    }));
+    });
   };
 
   useEffect(() => {
     setLoading(true);
-
     fetchParameters().then(() => setLoading(false));
   }, []);
 
@@ -173,7 +183,11 @@ export default function DailyParameters() {
                 mode="single"
                 selected={formData.date}
                 onSelect={(date) => {
-                  setFormData({ ...formData, date: date || new Date() });
+                  setFormData((prev) => ({
+                    ...prev,
+                    date: date || new Date(),
+                  }));
+                  updateFormDataForDate(date || new Date(), parameters);
                   setCalendarOpen(false);
                 }}
               />
@@ -201,9 +215,7 @@ export default function DailyParameters() {
                     {parameter.type === "string" && (
                       <TextCursorInput className="text-purple-500 w-5 h-5" />
                     )}
-                    <CardTitle>
-                      {parameter.name}
-                    </CardTitle>
+                    <CardTitle>{parameter.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {parameter.type === "boolean" ? (

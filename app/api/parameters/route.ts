@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
         _count: {
           select: { dataEntries: true }, // Use 'dataEntries' as per updated schema
         },
+        dataEntries: true,
       },
     });
 

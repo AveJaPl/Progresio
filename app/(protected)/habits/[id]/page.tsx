@@ -27,8 +27,12 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { FaFire } from "react-icons/fa";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { MdTrendingFlat } from "react-icons/md";
+import { GiTrophyCup } from "react-icons/gi";
+import { FaFire } from "react-icons/fa";
+import { AiOutlineNumber } from "react-icons/ai";
+import { RiCloseCircleFill, RiCheckboxCircleFill } from "react-icons/ri";
 
 export default function ParameterPage() {
   const { id } = useParams();
@@ -106,7 +110,7 @@ export default function ParameterPage() {
           (acc: number, entry: any) => acc + Number(entry.value),
           0
         ) / total
-      ).toFixed(2)}`;
+      ).toFixed()}`;
     } else {
       average = `${((successes / total) * 100).toFixed()}%`;
     }
@@ -351,10 +355,27 @@ export default function ParameterPage() {
           </div>
         </CardHeader>
         <CardContent className="hidden sm:grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-4">
-          {/* Here display averages, longest streak etc (stats) in cards*/}
           {Object.entries(stats).map(([key, value]) => (
             <Card className="flex flex-col items-center" key={key}>
-              <CardHeader>
+              <CardHeader className="flex flex-row space-y-0 items-center">
+                {key === "Average" && (
+                  <MdTrendingFlat className="mr-2 text-xl text-blue-500" />
+                )}
+                {key === "Longest streak" && (
+                  <GiTrophyCup className="mr-2 text-xl text-yellow-500" />
+                )}
+                {key === "Current streak" && (
+                  <FaFire className="mr-2 text-xl text-orange-500" />
+                )}
+                {key === "Total" && (
+                  <AiOutlineNumber className="mr-2 text-xl text-purple-500" />
+                )}
+                {key === "Fails" && (
+                  <RiCloseCircleFill className="mr-2 text-xl text-red-500" />
+                )}
+                {key === "Successes" && (
+                  <RiCheckboxCircleFill className="mr-2 text-xl text-green-500" />
+                )}
                 <CardTitle>{key}</CardTitle>
               </CardHeader>
               <CardContent>
