@@ -9,20 +9,27 @@ import {
   FaCog,
 } from "react-icons/fa";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-
 import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu"; // Import Navigation Menu components
-
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"; // Import Navigation Menu styles
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover"; // Import Popover components
+import { useMediaQuery } from "react-responsive"; // Import useMediaQuery to handle screen size detection
+import Settings from "./Settings";
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false); // State for Popover
+  const isMobile = useMediaQuery({ query: "(max-width: 768px)" }); // Check if mobile
 
   const routes = [
     {
@@ -50,8 +57,8 @@ function Header() {
   return (
     <header className="w-full flex items-center justify-between p-6 h-20 shadow-md relative">
       {/* Logo or Branding */}
-      <div className="flex-shrink-0">
-        <Link href="/" className="text-xl font-bold">
+      <div className="px-4 flex-shrink-0">
+        <Link href="/" className="text-3xl font-bold">
           Aurora
         </Link>
       </div>
@@ -60,19 +67,42 @@ function Header() {
       <nav className="hidden md:block">
         <NavigationMenu>
           <NavigationMenuList className="flex space-x-6">
-            {routes.map((route) => (
-              <NavigationMenuItem key={route.name}>
-                <Link href={route.href}>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    {route.name}
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            ))}
+            {routes.map((route) =>
+              route.name === "Settings" ? (
+                <NavigationMenuItem key={route.name}>
+                  {/* Popover for Settings on Desktop */}
+                  <Popover open={isPopoverOpen && !isMobile} onOpenChange={setIsPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        className={`${navigationMenuTriggerStyle()} flex items-center`}
+                      >
+                        {route.name}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="p-0 w-64"
+                      align="end"
+                      sideOffset={10}
+                    >
+                      <Settings />
+                    </PopoverContent>
+                  </Popover>
+                </NavigationMenuItem>
+              ) : (
+                <NavigationMenuItem key={route.name}>
+                  <Link href={route.href}>
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      {route.name}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              )
+            )}
           </NavigationMenuList>
         </NavigationMenu>
       </nav>
-      <div className="hidden md:block"></div>
 
       {/* Hamburger Menu for Mobile */}
       <div className="md:hidden">
@@ -86,43 +116,45 @@ function Header() {
       </div>
 
       {/* Mobile Navigation Drawer */}
-      <Drawer
-        onOpenChange={setIsMobileMenuOpen}
-        open={isMobileMenuOpen}
-        direction="right"
-      >
-        <DrawerContent
-          showBar={false}
-          className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none border-none"
+      {isMobile && (
+        <Drawer
+          onOpenChange={setIsMobileMenuOpen}
+          open={isMobileMenuOpen}
+          direction="right"
         >
-          {/* Button to close the menu */}
-          <Button
-            onClick={toggleMobileMenu}
-            className="absolute top-0 right-0 m-4"
-            variant="outline"
+          <DrawerContent
+            showBar={false}
+            className="h-screen top-0 right-0 left-auto mt-0 w-full rounded-none border-none"
           >
-            Close
-          </Button>
+            {/* Button to close the menu */}
+            <Button
+              onClick={toggleMobileMenu}
+              className="absolute top-0 right-0 m-4"
+              variant="outline"
+            >
+              Close
+            </Button>
 
-          <div className="w-full p-5 h-full flex flex-col gap-4 items-center justify-center">
-            {routes.map((route) => (
-              <Card
-                key={route.name}
-                className="w-3/4 flex items-center justify-center p-4"
-              >
-                <Link
-                  href={route.href}
-                  className="flex items-center justify-center space-x-2"
-                  onClick={toggleMobileMenu}
+            <div className="w-full p-5 h-full flex flex-col gap-4 items-center justify-center">
+              {routes.map((route) => (
+                <Card
+                  key={route.name}
+                  className="w-3/4 flex items-center justify-center p-4"
                 >
-                  {route.icon}
-                  <span>{route.name}</span>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </DrawerContent>
-      </Drawer>
+                  <Link
+                    href={route.href}
+                    className="flex items-center justify-center space-x-2"
+                    onClick={toggleMobileMenu}
+                  >
+                    {route.icon}
+                    <span>{route.name}</span>
+                  </Link>
+                </Card>
+              ))}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
     </header>
   );
 }
