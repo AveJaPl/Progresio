@@ -247,7 +247,7 @@ export default function DailyParameters() {
                             ? "Enter a number"
                             : "Enter a value"
                         }
-                        className="w-full"
+                        className="w-full text-base sm:text-sm"
                       />
                     )}
                   </CardContent>

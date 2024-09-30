@@ -10,10 +10,14 @@ export async function POST(request: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+  const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
+    userId: string;
+  };
 
   const { date, data, overwrite } = await request.json();
-  console.log(data);
+  console.log(
+    `Received data: Date: ${date}, Data: ${data}, Overwrite: ${overwrite}`
+  );
 
   const normalizedDate = startOfDay(parseISO(date));
 
@@ -21,7 +25,7 @@ export async function POST(request: NextRequest) {
     where: {
       date: normalizedDate,
       parameter: {
-        userId: userId
+        userId: userId,
       },
     },
   });
@@ -38,8 +42,8 @@ export async function POST(request: NextRequest) {
       where: {
         date: normalizedDate,
         parameter: {
-          userId: userId
-        }
+          userId: userId,
+        },
       },
     });
   }
