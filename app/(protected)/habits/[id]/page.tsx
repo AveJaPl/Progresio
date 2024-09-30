@@ -161,7 +161,7 @@ export default function ParameterPage() {
           />
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
-          <ScrollArea className="h-[calc(100vh-300px)]">
+          <ScrollArea className="h-[calc(100svh-300px)]">
             <div className="grid grid-cols-1 gap-4">
               {filteredEntries.length === 0 ? (
                 <div className="text-muted-foreground text-center col-span-3">
