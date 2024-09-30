@@ -20,13 +20,20 @@ export async function POST(request: NextRequest) {
   );
 
   const normalizedDate = startOfDay(parseISO(date));
+  console.log(`Normalized date: ${normalizedDate}`);
 
   const existingData = await prisma.parameterData.findMany({
     where: {
-      date: normalizedDate,
-      parameter: {
-        userId: userId,
-      },
+      AND: [
+        {
+          date: normalizedDate,
+        },
+        {
+          parameter: {
+            userId: userId,
+          },
+        },
+      ],
     },
   });
 
@@ -40,10 +47,16 @@ export async function POST(request: NextRequest) {
   if (existingData && overwrite) {
     await prisma.parameterData.deleteMany({
       where: {
-        date: normalizedDate,
-        parameter: {
-          userId: userId,
-        },
+        AND: [
+          {
+            date: normalizedDate,
+          },
+          {
+            parameter: {
+              userId: userId,
+            },
+          },
+        ],
       },
     });
   }
