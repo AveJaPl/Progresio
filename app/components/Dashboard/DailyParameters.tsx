@@ -90,6 +90,7 @@ export default function DailyParameters() {
     dataToPost: Record<string, any>,
     overwrite: boolean
   ) => {
+    console.log(dataToPost);
     const { status } = await postData("/api/daily-parameters", {
       ...dataToPost,
       overwrite,
@@ -102,6 +103,7 @@ export default function DailyParameters() {
 
     if (status === 200) {
       refreshParameters();
+      fetchParameters();
     }
 
     toast({

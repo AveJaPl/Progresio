@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       {
         name: "Workout",
         type: "boolean",
-        goalValue: "true",
+        goalValue: "Yes",
         goalOperator: "=",
         userId: user.id,
       },

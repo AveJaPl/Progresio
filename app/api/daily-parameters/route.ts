@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
   const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
 
   const { date, data, overwrite } = await request.json();
+  console.log(data);
 
   const normalizedDate = startOfDay(parseISO(date));
 
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       date: normalizedDate,
       parameter: {
         userId: userId
-      }
+      },
     },
   });
 
