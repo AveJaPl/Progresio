@@ -59,14 +59,17 @@ export default function ParameterPage() {
   }, [id]);
 
   // search for entries in parameter using date, name or value
-  const filteredEntries = parameter?.dataEntries?.filter((entry) => {
-  const matchesSearch = entry.date
-    .toString()
-    .toLowerCase()
-    .includes(search.toLowerCase());
-  const valueMatchesSearch = entry.value.toString().includes(search.toLowerCase());
-  return matchesSearch || valueMatchesSearch;
-}) ?? [];
+  const filteredEntries =
+    parameter?.dataEntries?.filter((entry) => {
+      const matchesSearch = entry.date
+        .toString()
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const valueMatchesSearch = entry.value
+        .toString()
+        .includes(search.toLowerCase());
+      return matchesSearch || valueMatchesSearch;
+    }) ?? [];
 
   if (loading) {
     return <Loading />;
@@ -95,12 +98,12 @@ export default function ParameterPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="w-full">
-        <CardHeader className="flex flex-col sm:grid sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-9 gap-4 space-y-0">
+    <div className="flex flex-col gap-0 sm:gap-4">
+      <Card className="w-full border-0 sm:border">
+        <CardHeader className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-9 gap-4 space-y-0 p-0 sm:p-6">
           {/* Here display general info about Parameter like name, type goal eg. >= 3000 */}
-          <div>
-            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
+          <div className="col-span-2 sm:col-span-1">
+            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
               <CardHeader className="flex flex-row items-center p-0">
                 <CardTitle>Name:</CardTitle>
               </CardHeader>
@@ -111,8 +114,8 @@ export default function ParameterPage() {
           </div>
           <div className="hidden lg:block col-span-3 2xl:col-span-6"></div>
           <div>
-            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
-              <CardHeader className="flex flex-row items-center p-0">
+            <Card className="flex flex-row items-center justify-center sm:justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
+              <CardHeader className="hidden sm:flex flex-row items-center p-0">
                 <CardTitle>Type:</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-row items-center justify-center p-0">
@@ -121,7 +124,7 @@ export default function ParameterPage() {
             </Card>
           </div>
           <div>
-            <Card className="flex flex-row items-center justify-between p-4 border-secondary-foreground">
+            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
               <CardHeader className="flex flex-row items-center p-0">
                 <CardTitle>Goal</CardTitle>
               </CardHeader>
@@ -146,8 +149,8 @@ export default function ParameterPage() {
           ))}
         </CardContent>
       </Card>
-      <Card className="w-full">
-        <CardHeader className="flex flex-row space-y-0 items-center justify-between">
+      <Card className="w-full border-0 sm:border">
+        <CardHeader className="flex flex-row space-y-0 items-center justify-between pr-0 pl-4 sm:p-6">
           <CardTitle>Habits</CardTitle>
           <Input
             type="text"
@@ -157,8 +160,8 @@ export default function ParameterPage() {
             className="w-2/3 lg:w-56 text-base sm:text-sm"
           />
         </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[calc(70vh-400px)]">
+        <CardContent className="p-0 sm:p-6">
+          <ScrollArea className="h-[calc(70vh-100px)]">
             <div className="grid grid-cols-1 gap-4">
               {filteredEntries.length === 0 ? (
                 <div className="text-muted-foreground text-center col-span-3">
