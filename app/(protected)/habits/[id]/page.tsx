@@ -10,28 +10,41 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Alert } from "@/components/ui/alert";
 import Loading from "@/app/components/loading";
 import { Parameter } from "@/app/types/Parameter";
-import { StreakResult } from "@/app/types/StreakResult";
 import { getData } from "@/app/utils/sendRequest";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
-import { CalendarIcon } from "@radix-ui/react-icons";
+import { format, differenceInDays, startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { deleteData, putData } from "@/app/utils/sendRequest";
+import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { FaFire } from "react-icons/fa";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export default function ParameterPage() {
   const { id } = useParams();
   const [parameter, setParameter] = useState<Parameter | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    id: "",
+    value: "",
+  });
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { toast } = useToast();
   const [stats, setStats] = useState({
-    Average: 0,
+    Average: "0%",
     "Longest streak": 0,
     "Current streak": 0,
     Total: 0,
@@ -49,7 +62,144 @@ export default function ParameterPage() {
       });
       return;
     }
-    console.log(data);
+
+    const total = data.dataEntries.length;
+
+    const habitType = data.type;
+    let fails;
+    if (habitType === "number") {
+      fails = data.dataEntries.filter((entry: any) => {
+        if (data.goalOperator === ">=") {
+          return Number(entry.value) < Number(data.goalValue);
+        }
+        if (data.goalOperator === "<=") {
+          return Number(entry.value) > Number(data.goalValue);
+        }
+        if (data.goalOperator === ">") {
+          return Number(entry.value) <= Number(data.goalValue);
+        }
+        if (data.goalOperator === "<") {
+          return Number(entry.value) >= Number(data.goalValue);
+        }
+        if (data.goalOperator === "=") {
+          return Number(entry.value) !== Number(data.goalValue);
+        }
+      }).length;
+    } else if (habitType === "boolean") {
+      fails = data.dataEntries.filter(
+        (entry: any) =>
+          entry.value != (data?.goalValue == "Yes" ? "true" : "false")
+      ).length;
+    } else if (habitType === "string") {
+      fails = data.dataEntries.filter(
+        (entry: any) => entry.value !== data.goalValue
+      ).length;
+    }
+
+    const successes = total - fails;
+
+    let average;
+
+    if (data.type === "number") {
+      average = `${(
+        data.dataEntries.reduce(
+          (acc: number, entry: any) => acc + Number(entry.value),
+          0
+        ) / total
+      ).toFixed(2)}`;
+    } else {
+      average = `${((successes / total) * 100).toFixed()}%`;
+    }
+
+    // Initialize streak variables
+    let longestStreak = 0;
+    let currentStreak = 0;
+    let tempStreak = 0;
+    let previousDate: Date | null = null;
+
+    // Define isSuccessForNumber function
+    const isSuccessForNumber = (value: number) => {
+      if (data.goalOperator === ">=") {
+        return value >= Number(data.goalValue);
+      } else if (data.goalOperator === "<=") {
+        return value <= Number(data.goalValue);
+      } else if (data.goalOperator === ">") {
+        return value > Number(data.goalValue);
+      } else if (data.goalOperator === "<") {
+        return value < Number(data.goalValue);
+      } else if (data.goalOperator === "=") {
+        return value === Number(data.goalValue);
+      } else {
+        return false;
+      }
+    };
+
+    // Sort entries by date ascending
+    const sortedEntries = data.dataEntries.sort(
+      (a: any, b: any) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    // Iterate over sorted entries to compute streaks
+    sortedEntries.forEach((entry: any) => {
+      let isSuccess: boolean = false;
+
+      if (data.type === "number") {
+        isSuccess = isSuccessForNumber(Number(entry.value));
+      } else if (data.type === "boolean") {
+        isSuccess =
+          entry.value === (data.goalValue === "Yes" ? "true" : "false");
+      } else if (data.type === "string") {
+        isSuccess = entry.value === data.goalValue;
+      }
+      const entryDate = startOfDay(new Date(entry.date));
+      const today = startOfDay(new Date());
+
+      if (entryDate > today) {
+        return;
+      }
+      if (isSuccess) {
+        if (previousDate === null) {
+          tempStreak = 1;
+        } else {
+          const daysDifference = differenceInDays(entryDate, previousDate);
+          if (daysDifference === 1) {
+            tempStreak += 1;
+          } else if (daysDifference === 0) {
+            // Same day, do nothing
+          } else {
+            tempStreak = 1;
+          }
+        }
+        if (tempStreak > longestStreak) {
+          longestStreak = tempStreak;
+        }
+      } else {
+        tempStreak = 0;
+      }
+      previousDate = entryDate;
+    });
+
+    // Determine current streak
+    const today = startOfDay(new Date());
+    const daysSinceLastEntry = previousDate
+      ? differenceInDays(today, previousDate)
+      : null;
+
+    if (daysSinceLastEntry !== null && daysSinceLastEntry === 0) {
+      currentStreak = tempStreak;
+    } else {
+      currentStreak = 0;
+    }
+
+    setStats({
+      Average: average,
+      "Longest streak": longestStreak,
+      "Current streak": currentStreak,
+      Total: total,
+      Fails: fails,
+      Successes: successes,
+    });
     setParameter(data);
     setLoading(false);
   };
@@ -65,9 +215,12 @@ export default function ParameterPage() {
         const dateMatchesSearch = format(entry.date, "P")
           .toLowerCase()
           .includes(search.toLowerCase());
-        const valueMatchesSearch = entry.value
-          .toLowerCase()
-          .includes(search.toLowerCase());
+        const valueMatchesSearch =
+          parameter.type === "boolean"
+            ? (entry.value === "true" ? "Yes" : "No")
+                .toLowerCase()
+                .includes(search.toLowerCase())
+            : entry.value.toLowerCase().includes(search.toLowerCase());
         return dateMatchesSearch || valueMatchesSearch;
       })
       .sort((a, b) => {
@@ -100,13 +253,68 @@ export default function ParameterPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const { status } = await deleteData(`/api/daily-parameters/${id}`);
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to delete parameter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Parameter deleted successfully",
+      variant: "default",
+    });
+
+    fetchParameter();
+  };
+
+  const handleEdit = async () => {
+    const { status } = await putData(`/api/daily-parameters/${editData.id}`, {
+      value: editData.value,
+    });
+    if (status !== 200) {
+      toast({
+        title: "Error",
+        description: "Failed to edit parameter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Parameter edited successfully",
+      variant: "default",
+    });
+    setEditData({
+      id: "",
+      value: "",
+    });
+    fetchParameter();
+  };
+
   return (
     <div className="flex flex-col gap-0 sm:gap-4">
       <Card className="w-full border-0 sm:border">
         <CardHeader className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-9 gap-4 space-y-0 p-0 sm:p-6">
           {/* Here display general info about Parameter like name, type goal eg. >= 3000 */}
           <div className="col-span-2 sm:col-span-1">
-            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
+            {stats["Current streak"] === stats["Longest streak"] && (
+              <Alert className="sm:hidden rounded-xl mb-4 pl-6">
+                {/* Fa fire icon colored orange */}
+                <FaFire className="text-2xl" style={{ color: "orange" }} />
+                <AlertTitle>Keep it up!</AlertTitle>
+                <AlertDescription>
+                  You are on your longest streak!
+                </AlertDescription>
+              </Alert>
+            )}
+            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4">
               <CardHeader className="flex flex-row items-center p-0">
                 <CardTitle>Name:</CardTitle>
               </CardHeader>
@@ -117,7 +325,7 @@ export default function ParameterPage() {
           </div>
           <div className="hidden lg:block col-span-3 2xl:col-span-6"></div>
           <div>
-            <Card className="flex flex-row items-center justify-center sm:justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
+            <Card className="flex flex-row items-center justify-center sm:justify-between px-4 py-3 sm:p-4">
               <CardHeader className="hidden sm:flex flex-row items-center p-0">
                 <CardTitle>Type:</CardTitle>
               </CardHeader>
@@ -127,12 +335,16 @@ export default function ParameterPage() {
             </Card>
           </div>
           <div>
-            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4 border-border sm:border-secondary-foreground">
+            <Card className="flex flex-row items-center justify-between px-4 py-3 sm:p-4">
               <CardHeader className="flex flex-row items-center p-0">
-                <CardTitle>Goal</CardTitle>
+                <CardTitle>
+                  Goal{parameter.type === "boolean" ? ":" : ""}
+                </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-row gap-2 p-0">
-                <div>{parameter.goalOperator}</div>
+                <div>
+                  {parameter.type === "boolean" ? "" : parameter.goalOperator}
+                </div>
                 <div>{parameter.goalValue}</div>
               </CardContent>
             </Card>
@@ -164,19 +376,16 @@ export default function ParameterPage() {
           />
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
             {filteredEntries.length === 0 ? (
-              <div className="text-muted-foreground text-center col-span-3">
+              <div className="text-muted-foreground text-center col-span-full">
                 No habits found
               </div>
             ) : (
               filteredEntries.map((entry) => (
-                <Card
-                  key={entry.id}
-                  className="grid grid-cols-3 sm:flex sm:flex-row sm:items-center"
-                >
-                  <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2">
-                    <CardHeader className="sm:space-y-0">
+                <Card key={entry.id} className="grid grid-cols-3">
+                  <div className="col-span-2 grid grid-cols-1">
+                    <CardHeader>
                       <Button
                         variant="outline"
                         className="flex flex-row items-center"
@@ -192,11 +401,16 @@ export default function ParameterPage() {
                         </span>
                       </Button>
                     </CardHeader>
-                    <CardContent className="sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                      <Card className="flex flex-row items-center justify-between p-4 sm:p-1 sm:justify-center rounded-md">
+                    <CardContent>
+                      <Card className="flex flex-row items-center justify-between p-4 rounded-md">
                         <CardHeader className="p-0">
                           <CardTitle className="p-0 text-muted-foreground">
-                            Value: {entry.value}
+                            Value:{" "}
+                            {parameter.type === "boolean"
+                              ? entry.value === "true"
+                                ? "Yes"
+                                : "No"
+                              : entry.value}
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
@@ -205,13 +419,21 @@ export default function ParameterPage() {
                               <div className="flex flex-row items-center gap-2">
                                 <Badge
                                   variant={
-                                    entry.value == "true"
+                                    entry.value ==
+                                    (parameter.goalValue === "Yes"
+                                      ? "true"
+                                      : "false")
                                       ? "default"
                                       : "destructive"
                                   }
                                   className="w-16 flex items-center justify-center"
                                 >
-                                  {entry.value == "true" ? "Success" : "Fail"}
+                                  {entry.value ==
+                                  (parameter.goalValue === "Yes"
+                                    ? "true"
+                                    : "false")
+                                    ? "Success"
+                                    : "Fail"}
                                 </Badge>
                               </div>
                             ) : parameter.type === "number" ? (
@@ -250,18 +472,30 @@ export default function ParameterPage() {
                       </Card>
                     </CardContent>
                   </div>
-                  <CardFooter className="flex flex-col items-end justify-end gap-4 sm:flex-row">
+                  <CardFooter className="flex flex-col items-end justify-end gap-4">
                     <Button
                       variant="secondary"
-                      className="flex flex-row items-center"
-                      onClick={() => console.log("Simulate edit")}
+                      className="flex flex-row items-center w-20"
+                      onClick={() => {
+                        setEditData({
+                          id: entry.id,
+                          value: entry.value,
+                        });
+                        setModalOpen(true);
+                      }}
                     >
                       Edit
                     </Button>
                     <Button
                       variant="outline"
-                      className="flex flex-row items-center"
-                      onClick={() => console.log("Simulate delete")}
+                      className="flex flex-row items-center w-20"
+                      onClick={() => {
+                        setEditData({
+                          id: entry.id,
+                          value: entry.value,
+                        });
+                        setDeleteModalOpen(true);
+                      }}
                     >
                       Delete
                     </Button>
@@ -272,6 +506,136 @@ export default function ParameterPage() {
           </div>
         </CardContent>
       </Card>
+      {/* Modal for editing data */}
+      <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
+        <AlertDialogContent className="space-y-6 p-0">
+          <Card className="border-none">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Edit Data</CardTitle>
+              <Button disabled variant="outline">
+                {editData.id
+                  ? format(
+                      parameter.dataEntries.find(
+                        (entry) => entry.id === editData.id
+                      )?.date || new Date(),
+                      "PPP"
+                    )
+                  : "Pick a date"}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {parameter.type === "string" ? (
+                <Input
+                  type="text"
+                  placeholder="Enter new value"
+                  value={editData.value}
+                  onChange={(e) =>
+                    setEditData({
+                      id: editData.id,
+                      value: e.target.value,
+                    })
+                  }
+                  className="w-full"
+                />
+              ) : parameter.type === "number" ? (
+                <Input
+                  type="number"
+                  placeholder="Enter new value"
+                  value={editData.value}
+                  onChange={(e) =>
+                    setEditData({
+                      id: editData.id,
+                      value: e.target.value,
+                    })
+                  }
+                  className="w-full"
+                />
+              ) : parameter.type === "boolean" ? (
+                <Select
+                  value={String(editData.value)}
+                  onValueChange={(value) =>
+                    setEditData({
+                      id: editData.id,
+                      value: value,
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select value" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : null}
+            </CardContent>
+            <CardFooter className="flex justify-end p-4 space-x-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditData({
+                    id: "",
+                    value: "",
+                  });
+                  setModalOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  handleEdit();
+                  setModalOpen(false);
+                }}
+              >
+                Confirm
+              </Button>
+            </CardFooter>
+          </Card>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Are you sure modal for deletion */}
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <AlertDialogContent className="p-0 space-y-6">
+          <Card className="border-none">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Are you sure?</CardTitle>
+              <Button disabled variant="outline">
+                {editData.id
+                  ? format(
+                      parameter.dataEntries.find(
+                        (entry) => entry.id === editData.id
+                      )?.date || new Date(),
+                      "PPP"
+                    )
+                  : "Pick a date"}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <p>Do you want to delete this data?</p>
+            </CardContent>
+            <CardFooter className="flex justify-end p-4 space-x-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  handleDelete(editData.id);
+                  setDeleteModalOpen(false);
+                }}
+              >
+                Confirm
+              </Button>
+            </CardFooter>
+          </Card>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

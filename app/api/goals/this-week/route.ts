@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
-import { decrypt } from "@/app/utils/encryption";
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,7 +42,10 @@ export async function GET(request: NextRequest) {
 
     console.log(goalsThisWeek);
     if (goalsThisWeek.length === 0) {
-      return NextResponse.json(0);
+      return NextResponse.json({
+        total: 0,
+        finished: 0,
+      });
     }
 
     const total = goalsThisWeek.length;
@@ -53,8 +55,10 @@ export async function GET(request: NextRequest) {
       (goal) => goal.status === "Completed"
     ).length;
 
-
-    return NextResponse.json({ finished, total});
+    return NextResponse.json({
+      total,
+      finished,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

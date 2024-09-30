@@ -6,13 +6,9 @@ import {
   FaTachometerAlt,
   FaBullseye,
   FaClipboardList,
-  FaChartBar,
   FaCog,
 } from "react-icons/fa";
-import {
-  Drawer,
-  DrawerContent,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 import {
   NavigationMenu,
@@ -40,7 +36,6 @@ function Header() {
       href: "/habits",
       icon: <FaClipboardList className="h-6 w-6" />,
     },
-    { name: "Stats", href: "/stats", icon: <FaChartBar className="h-6 w-6" /> },
     {
       name: "Settings",
       href: "/settings",

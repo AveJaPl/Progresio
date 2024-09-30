@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAppContext } from "@/app/context/DashboardContext";
 export default function Statistics() {
-  const { goalProgress, parameterProgress, loadingProgress } = useAppContext();
+  const { goalProgress, parameterProgress } = useAppContext();
 
   return (
     <Card className="order-2 xl:order-4">
@@ -21,7 +21,7 @@ export default function Statistics() {
               {goalProgress.total === 0 ? 0 : (goalProgress.finished / goalProgress.total * 100).toFixed()}% finished
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              {goalProgress.total === 0 ? "" : goalProgress.total - goalProgress.finished} goals left
+              {goalProgress.total === 0 ? "" : `${goalProgress.total - goalProgress.finished} goals left`}
             </p>
           </div>
         </div>

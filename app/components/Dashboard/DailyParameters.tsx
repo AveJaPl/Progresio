@@ -247,9 +247,9 @@ export default function DailyParameters() {
         <Button onClick={() => handleUpdate()}>Update</Button>
       </CardFooter>
       <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
-        <AlertDialogContent className="p-6 space-y-6">
+        <AlertDialogContent className="p-2 space-y-6">
           <AlertDialogHeader className="space-y-4">
-            <Card className="bg-background">
+            <Card className="bg-background border-none">
               <CardHeader className="p-4">
                 <CardTitle>Data Already Exists</CardTitle>
               </CardHeader>
