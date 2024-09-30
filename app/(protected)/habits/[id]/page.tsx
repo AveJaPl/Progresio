@@ -58,18 +58,21 @@ export default function ParameterPage() {
     fetchParameter();
   }, [id]);
 
-  // search for entries in parameter using date, name or value
+  // search for entries in parameter using date or value sort using date
   const filteredEntries =
-    parameter?.dataEntries?.filter((entry) => {
-      const matchesSearch = entry.date
-        .toString()
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const valueMatchesSearch = entry.value
-        .toString()
-        .includes(search.toLowerCase());
-      return matchesSearch || valueMatchesSearch;
-    }) ?? [];
+    parameter?.dataEntries
+      ?.filter((entry) => {
+        const dateMatchesSearch = format(entry.date, "P")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const valueMatchesSearch = entry.value
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        return dateMatchesSearch || valueMatchesSearch;
+      })
+      .sort((a, b) => {
+        return a.date > b.date ? -1 : 1;
+      }) || [];
 
   if (loading) {
     return <Loading />;
@@ -161,116 +164,112 @@ export default function ParameterPage() {
           />
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
-          <ScrollArea className="h-[calc(100vh-400px)]">
-            <div className="grid grid-cols-1 gap-4">
-              {filteredEntries.length === 0 ? (
-                <div className="text-muted-foreground text-center col-span-3">
-                  No habits found
-                </div>
-              ) : (
-                filteredEntries.map((entry) => (
-                  <Card
-                    key={entry.id}
-                    className="grid grid-cols-3 sm:flex sm:flex-row sm:items-center"
-                  >
-                    <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2">
-                      <CardHeader className="sm:space-y-0">
-                        <Button
-                          variant="outline"
-                          className="flex flex-row items-center"
-                          disabled
-                        >
-                          <span className="hidden md:flex">
-                            {entry.date
-                              ? format(entry.date, "PPP")
-                              : "Pick a date"}
-                          </span>
-                          <span className="flex md:hidden">
-                            {entry.date
-                              ? format(entry.date, "P")
-                              : "Pick a date"}
-                          </span>
-                        </Button>
-                      </CardHeader>
-                      <CardContent className="sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                        <Card className="flex flex-row items-center justify-between p-4 sm:p-1 sm:justify-center rounded-md">
-                          <CardHeader className="p-0">
-                            <CardTitle className="p-0 text-muted-foreground">
-                              Value: {entry.value}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-0">
-                            <div>
-                              {parameter.type === "boolean" ? (
-                                <div className="flex flex-row items-center gap-2">
-                                  <Badge
-                                    variant={
-                                      entry.value == "true"
-                                        ? "default"
-                                        : "destructive"
-                                    }
-                                    className="w-16 flex items-center justify-center"
-                                  >
-                                    {entry.value == "true" ? "Success" : "Fail"}
-                                  </Badge>
-                                </div>
-                              ) : parameter.type === "number" ? (
-                                <div className="flex flex-row items-center gap-2">
-                                  <Badge
-                                    variant={
-                                      isSuccessForNumber(Number(entry.value))
-                                        ? "default"
-                                        : "destructive"
-                                    }
-                                    className="w-16 flex items-center justify-center"
-                                  >
-                                    {isSuccessForNumber(Number(entry.value))
-                                      ? "Success"
-                                      : "Fail"}
-                                  </Badge>
-                                </div>
-                              ) : parameter.type === "string" ? (
-                                <div className="flex flex-row items-center gap-2">
-                                  <Badge
-                                    variant={
-                                      entry.value === parameter.goalValue
-                                        ? "default"
-                                        : "destructive"
-                                    }
-                                    className="w-16 flex items-center justify-center"
-                                  >
-                                    {entry.value === parameter.goalValue
-                                      ? "Success"
-                                      : "Fail"}
-                                  </Badge>
-                                </div>
-                              ) : null}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </CardContent>
-                    </div>
-                    <CardFooter className="flex flex-col items-end justify-end gap-4 sm:flex-row">
-                      <Button
-                        variant="secondary"
-                        className="flex flex-row items-center"
-                        onClick={() => console.log("Simulate edit")}
-                      >
-                        Edit
-                      </Button>
+          <div className="grid grid-cols-1 gap-4">
+            {filteredEntries.length === 0 ? (
+              <div className="text-muted-foreground text-center col-span-3">
+                No habits found
+              </div>
+            ) : (
+              filteredEntries.map((entry) => (
+                <Card
+                  key={entry.id}
+                  className="grid grid-cols-3 sm:flex sm:flex-row sm:items-center"
+                >
+                  <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2">
+                    <CardHeader className="sm:space-y-0">
                       <Button
                         variant="outline"
                         className="flex flex-row items-center"
-                        onClick={() => console.log("Simulate delete")}
+                        disabled
                       >
-                        Delete
+                        <span className="hidden md:flex">
+                          {entry.date
+                            ? format(entry.date, "PPP")
+                            : "Pick a date"}
+                        </span>
+                        <span className="flex md:hidden">
+                          {entry.date ? format(entry.date, "P") : "Pick a date"}
+                        </span>
                       </Button>
-                    </CardFooter>
-                  </Card>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+                    </CardHeader>
+                    <CardContent className="sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <Card className="flex flex-row items-center justify-between p-4 sm:p-1 sm:justify-center rounded-md">
+                        <CardHeader className="p-0">
+                          <CardTitle className="p-0 text-muted-foreground">
+                            Value: {entry.value}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                          <div>
+                            {parameter.type === "boolean" ? (
+                              <div className="flex flex-row items-center gap-2">
+                                <Badge
+                                  variant={
+                                    entry.value == "true"
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="w-16 flex items-center justify-center"
+                                >
+                                  {entry.value == "true" ? "Success" : "Fail"}
+                                </Badge>
+                              </div>
+                            ) : parameter.type === "number" ? (
+                              <div className="flex flex-row items-center gap-2">
+                                <Badge
+                                  variant={
+                                    isSuccessForNumber(Number(entry.value))
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="w-16 flex items-center justify-center"
+                                >
+                                  {isSuccessForNumber(Number(entry.value))
+                                    ? "Success"
+                                    : "Fail"}
+                                </Badge>
+                              </div>
+                            ) : parameter.type === "string" ? (
+                              <div className="flex flex-row items-center gap-2">
+                                <Badge
+                                  variant={
+                                    entry.value === parameter.goalValue
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="w-16 flex items-center justify-center"
+                                >
+                                  {entry.value === parameter.goalValue
+                                    ? "Success"
+                                    : "Fail"}
+                                </Badge>
+                              </div>
+                            ) : null}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </CardContent>
+                  </div>
+                  <CardFooter className="flex flex-col items-end justify-end gap-4 sm:flex-row">
+                    <Button
+                      variant="secondary"
+                      className="flex flex-row items-center"
+                      onClick={() => console.log("Simulate edit")}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex flex-row items-center"
+                      onClick={() => console.log("Simulate delete")}
+                    >
+                      Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
