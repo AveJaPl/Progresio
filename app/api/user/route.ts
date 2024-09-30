@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
 
-export default async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("token")?.value;
 
