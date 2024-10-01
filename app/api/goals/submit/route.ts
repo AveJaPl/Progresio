@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       userId: string;
     };
 
-    const { data } = await request.json(); // array of goals ids
+    const { data, date } = await request.json(); // array of goals ids
 
     console.log(data);
     
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       },
       data: {
         status: "Completed",
-        finishedAt: new Date(),
+        finishedAt: date || new Date(),
       },
     });
 

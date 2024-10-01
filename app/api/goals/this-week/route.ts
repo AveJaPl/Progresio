@@ -18,17 +18,23 @@ export async function GET(request: NextRequest) {
     today.setHours(0, 0, 0, 0);
     console.log("Today: ");
     console.log(today);
+
     const dayOfWeek = (today.getDay() + 6) % 7;
     console.log("Day of week: ");
     console.log(dayOfWeek);
+
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
+    
     console.log("Start of week: ");
     console.log(startOfWeek);
+
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 7);
+
     console.log("End of week: ");
     console.log(endOfWeek);
+    
     // Fetch goals for the user that are due this week
     const goalsThisWeek = await prisma.goal.findMany({
       where: {

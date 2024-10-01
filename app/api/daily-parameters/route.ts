@@ -16,17 +16,15 @@ export async function POST(request: NextRequest) {
 
   const { date, data, overwrite } = await request.json();
   console.log(
-    `Received data: Date: ${date}, Data: ${data}, Overwrite: ${overwrite}`
+    `Received data: Date: ${date}, Data: ${JSON.stringify(data, null, 2)}, Overwrite: ${overwrite}`
   );
 
-  const normalizedDate = startOfDay(parseISO(date));
-  console.log(`Normalized date: ${normalizedDate.toISOString()}`);
 
   const existingData = await prisma.parameterData.findMany({
     where: {
       AND: [
         {
-          date: normalizedDate,
+          date: date,
         },
         {
           parameter: {
@@ -49,7 +47,7 @@ export async function POST(request: NextRequest) {
       where: {
         AND: [
           {
-            date: normalizedDate,
+            date: date,
           },
           {
             parameter: {
@@ -63,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   const dataEntry = await prisma.parameterData.createMany({
     data: data.map((entry: any) => ({
-      date: normalizedDate,
+      date: date,
       value: entry.value,
       parameterId: entry.id,
     })),
