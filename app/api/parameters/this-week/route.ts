@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
 import { encrypt, decrypt } from "@/app/utils/encryption";
+import { startOfWeek } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,26 +18,27 @@ export async function GET(request: NextRequest) {
       userId: string;
     };
 
-    const today = new Date();
+    const timeZone = request.headers.get("Timezone") || "UTC";
+    console.log("Im in parameters --------------")
+
+
+    const today = toZonedTime(new Date(), timeZone);
     today.setHours(0, 0, 0, 0);
-    console.log("Today: ");
+    console.log("Zoned today: ");
     console.log(today);
 
     const dayOfWeek = (today.getDay() + 6) % 7;
     console.log("Day of week: ");
     console.log(dayOfWeek);
 
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek);
+    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 });
 
     console.log("Start of week: ");
-    console.log(startOfWeek);
+    console.log(startOfCurrentWeek);
 
-    const endOfWeek = new Date(today);
-    endOfWeek.setHours(23, 59, 59, 999);
-
-    console.log("End of week: ");
-    console.log(endOfWeek);
+    const endOfCurrentWeek = today;
+    endOfCurrentWeek.setHours(23, 59, 59, 999); // Ustawienie na koniec dnia
+    console.log("End of Week (Zoned): ", endOfCurrentWeek);
 
     // 3. Fetch parameters and associated data entries for the current week
     const parameters = await prisma.parameter.findMany({
@@ -44,8 +47,8 @@ export async function GET(request: NextRequest) {
         dataEntries: {
           where: {
             date: {
-              gte: startOfWeek,
-              lt: endOfWeek,
+              gte: startOfCurrentWeek,
+              lt: endOfCurrentWeek,
             },
           },
         },
@@ -60,7 +63,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`Fetched parameters between: ${startOfWeek} and ${endOfWeek}`);
+    console.log(`Fetched parameters between: ${startOfCurrentWeek} and ${endOfCurrentWeek}`);
 
 
     const decryptedParameters = parameters.map((parameter) => ({

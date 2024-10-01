@@ -17,7 +17,9 @@ export async function GET(request: NextRequest) {
     };
 
     const timeZone = request.headers.get("Timezone") || "UTC";
+    console.log("Im in goals --------------")
 
+    
     const today = toZonedTime(new Date(), timeZone);
     today.setHours(0, 0, 0, 0);
     console.log("Zoned today: ");
