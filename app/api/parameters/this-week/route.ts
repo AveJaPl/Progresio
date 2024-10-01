@@ -27,10 +27,13 @@ export async function GET(request: NextRequest) {
 
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - dayOfWeek);
+
     console.log("Start of week: ");
     console.log(startOfWeek);
+
     const endOfWeek = new Date(today);
     endOfWeek.setHours(23, 59, 59, 999);
+
     console.log("End of week: ");
     console.log(endOfWeek);
 
@@ -50,11 +53,15 @@ export async function GET(request: NextRequest) {
     });
 
     if (parameters.length === 0) {
+      console.log("No parameters found");
       return NextResponse.json(
         { error: "No parameters found" },
         { status: 404 }
       );
     }
+
+    console.log(`Fetched parameters between: ${startOfWeek} and ${endOfWeek}`);
+
 
     const decryptedParameters = parameters.map((parameter) => ({
       ...parameter,

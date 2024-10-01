@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
+import { toZonedTime } from "date-fns-tz";
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +16,9 @@ export async function GET(request: NextRequest) {
       userId: string;
     };
 
-    const today = new Date();
+    const timeZone = request.headers.get('Timezone') || 'UTC';
+
+    const today = toZonedTime(new Date(), timeZone)
     today.setHours(0, 0, 0, 0);
     console.log("Today: ");
     console.log(today);
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
+    console.log(`Fetching goals for the week: ${startOfWeek} - ${endOfWeek}`);
     console.log(goalsThisWeek);
     if (goalsThisWeek.length === 0) {
       return NextResponse.json({
