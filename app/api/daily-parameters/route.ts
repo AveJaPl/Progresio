@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
       where: {
         AND: [
           {
-            date: date,
+            date: {
+              gte: utcStartOfDay,
+              lte: utcEndOfDay,
+            }
           },
           {
             parameter: {
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
 
   const dataEntry = await prisma.parameterData.createMany({
     data: data.map((entry: any) => ({
-      date: date,
+      date: utcStartOfDay,
       value: entry.value,
       parameterId: entry.id,
     })),
