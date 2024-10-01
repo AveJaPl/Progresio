@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   );
 
   const normalizedDate = startOfDay(parseISO(date));
-  console.log(`Normalized date: ${normalizedDate}`);
+  console.log(`Normalized date: ${normalizedDate.toISOString()}`);
 
   const existingData = await prisma.parameterData.findMany({
     where: {

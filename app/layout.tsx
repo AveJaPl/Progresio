@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: "Aurora",
   description:
     "Aurora is an application for tracking personal growth and development. Designed to help you set goals, track progress, and reflect on your journey.",
+    manifest: '/manifest.json',
 };
 
 export default function RootLayout({

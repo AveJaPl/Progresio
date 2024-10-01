@@ -1,0 +1,19 @@
+{
+    "name": "Aurora",
+    "short_name": "Aurora",
+    "description": "Aurora is an application for tracking personal growth and development. Designed to help you set goals, track progress, and reflect on your journey.",
+    "lang": "en",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1c1b22",
+    "theme_color": "#ff52722",
+    "orientation": "portrait-primary",
+    "icons": [
+      {
+        "src": "/favicon.ico",
+        "type": "image/x-icon",
+        "sizes": "64x64"
+      }
+    ]
+  }
+  
