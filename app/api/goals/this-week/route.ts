@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
 import { toZonedTime } from "date-fns-tz";
-
+import { startOfWeek, endOfWeek } from "date-fns";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,40 +16,39 @@ export async function GET(request: NextRequest) {
       userId: string;
     };
 
-    const timeZone = request.headers.get('Timezone') || 'UTC';
+    const timeZone = request.headers.get("Timezone") || "UTC";
 
-    const today = toZonedTime(new Date(), timeZone)
+    const today = toZonedTime(new Date(), timeZone);
     today.setHours(0, 0, 0, 0);
-    console.log("Today: ");
+    console.log("Zoned today: ");
     console.log(today);
 
     const dayOfWeek = (today.getDay() + 6) % 7;
     console.log("Day of week: ");
     console.log(dayOfWeek);
 
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek);
-    
+    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 });
+
     console.log("Start of week: ");
-    console.log(startOfWeek);
+    console.log(startOfCurrentWeek);
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 7);
+    const endOfCurrentWeek = endOfWeek(today, { weekStartsOn: 1 });
+    endOfCurrentWeek.setHours(23, 59, 59, 999); // Ustawienie na koniec dnia
+    console.log("End of Week (Zoned): ", endOfCurrentWeek);
 
-    console.log("End of week: ");
-    console.log(endOfWeek);
-    
     // Fetch goals for the user that are due this week
     const goalsThisWeek = await prisma.goal.findMany({
       where: {
         userId: decoded.userId,
         deadline: {
-          gte: startOfWeek,
-          lte: endOfWeek,
+          gte: startOfCurrentWeek,
+          lte: endOfCurrentWeek,
         },
       },
     });
-    console.log(`Fetching goals for the week: ${startOfWeek} - ${endOfWeek}`);
+    console.log(
+      `Fetching goals for the week: ${startOfCurrentWeek} - ${endOfCurrentWeek}`
+    );
     console.log(goalsThisWeek);
     if (goalsThisWeek.length === 0) {
       return NextResponse.json({
