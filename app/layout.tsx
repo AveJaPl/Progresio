@@ -21,7 +21,10 @@ export const metadata: Metadata = {
   description:
     "Aurora is an application for tracking personal growth and development. Designed to help you set goals, track progress, and reflect on your journey.",
   manifest: "/manifest.json",
-  themeColor: "#000000",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" }, // Jasny tryb: Biały pasek
+    { media: "(prefers-color-scheme: dark)", color: "#000000" }, // Ciemny tryb: Czarny pasek
+  ],
 };
 
 export default function RootLayout({
@@ -31,6 +34,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#000000" />
+        {/* Specjalne metatagi dla iOS */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
