@@ -69,7 +69,9 @@ export default function RootLayout({
         >
           <AuthProvider>
             {children}
-            <Toaster />
+            <div className="hidden sm:block">
+              <Toaster />
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>
