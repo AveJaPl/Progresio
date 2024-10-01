@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import {
   Popover,
   PopoverTrigger,
@@ -57,23 +57,27 @@ export default function DailyParameters() {
     if (getResponse.status !== 200) {
       return;
     }
+    console.log(getResponse.data);
     setParameters(getResponse.data);
     updateFormDataForDate(new Date(), getResponse.data);
   };
 
   // Funkcja do aktualizacji formData dla wybranej daty
   const updateFormDataForDate = (date: Date, params: Parameter[]) => {
+    console.log("Updating form data for date: ", date);
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
+    console.log("Target date: ", format(targetDate, "yyyy-MM-dd"));
 
-    const initialFormData = params.map((param) => ({
-      id: param.id,
-      value:
-        param.dataEntries.find(
-          (entry) =>
-            new Date(entry.date).toISOString() === targetDate.toISOString()
-        )?.value || "",
-    }));
+    const initialFormData = params.map((param) => {
+      const entry = param.dataEntries.find((entry) =>
+        isSameDay(new Date(entry.date), targetDate)
+      );
+      return {
+        id: param.id,
+        value: entry?.value || "",
+      };
+    });
 
     setFormData({
       date: targetDate,
