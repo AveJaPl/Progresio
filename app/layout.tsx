@@ -21,10 +21,6 @@ export const metadata: Metadata = {
   description:
     "Aurora is an application for tracking personal growth and development. Designed to help you set goals, track progress, and reflect on your journey.",
   manifest: "/manifest.json",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" }, // Jasny tryb: Biały pasek
-    { media: "(prefers-color-scheme: dark)", color: "#000000" }, // Ciemny tryb: Czarny pasek
-  ],
 };
 
 export default function RootLayout({
