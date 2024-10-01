@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import jwt from "jsonwebtoken";
-import { fromZonedTime } from "date-fns-tz";
-import { parseISO, startOfDay } from "date-fns";
 
 // post dataEntries - daily parameters
 export async function POST(request: NextRequest) {
@@ -24,21 +22,13 @@ export async function POST(request: NextRequest) {
     )}, Overwrite: ${overwrite}`
   );
 
-  const timeZone = request.headers.get("Timezone") || "UTC";
-  console.log("Im in daily-parameters --------------");
-  console.log("Timezone: ", timeZone);
+  // 3. Parsowanie daty jako UTC
+  // Zakładam, że `date` jest w formacie 'YYYY-MM-DD'
+  const utcStartOfDay = new Date(`${date}T00:00:00Z`); // "2024-09-30T00:00:00Z"
+  const utcEndOfDay = new Date(`${date}T23:59:59.999Z`); // "2024-09-30T23:59:59.999Z"
 
-  const userDate = parseISO(date);
-  const userStartOfDay = startOfDay(userDate);
-  const utcStartOfDay = fromZonedTime(userStartOfDay, timeZone);
-  console.log("User date: ", userDate);
-  console.log("User start of day: ", userStartOfDay);
-  console.log("UTC start of day: ", utcStartOfDay);
-
-  const utcEndOfDay = new Date(utcStartOfDay);
-  utcEndOfDay.setHours(23, 59, 59, 999);
-
-  console.log("UTC end of day: ", utcEndOfDay);
+  console.log("UTC Start of Day: ", utcStartOfDay);
+  console.log("UTC End of Day: ", utcEndOfDay);
 
   const existingData = await prisma.parameterData.findMany({
     where: {

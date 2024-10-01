@@ -145,7 +145,7 @@ export default function DailyParameters() {
 
     handleSubmit(
       {
-        date: formData.date,
+        date: format(formData.date, "yyyy-MM-dd"),
         data: mappedData,
       },
       overwriteFlag
