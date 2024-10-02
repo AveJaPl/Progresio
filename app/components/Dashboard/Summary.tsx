@@ -5,11 +5,11 @@ export default function Summary() {
   return (
     <Card className="order-1">
       <CardHeader>
-        <CardTitle>Podsumowanie</CardTitle>
+        <CardTitle>Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Witaj na swoim dashboardzie!</p>
-        <p>Sprawdź swoje ostatnie cele i aktywności.</p>
+        <p>Welcome to your dashboard!</p>
+        <p>Check your latest goals and activities.</p>
       </CardContent>
     </Card>
   );

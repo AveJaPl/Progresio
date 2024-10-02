@@ -308,7 +308,7 @@ export default function ParameterPage() {
         <CardHeader className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-9 gap-4 space-y-0 p-0 sm:p-6">
           {/* Here display general info about Parameter like name, type goal eg. >= 3000 */}
           <div className="col-span-2 sm:col-span-1">
-            {stats["Current streak"] === stats["Longest streak"] && (
+            {stats["Current streak"] === stats["Longest streak"] && stats["Total"] != 0 && (
               <Alert className="sm:hidden rounded-xl mb-4 pl-6">
                 {/* Fa fire icon colored orange */}
                 <FaFire className="text-2xl" style={{ color: "orange" }} />
@@ -556,7 +556,7 @@ export default function ParameterPage() {
                       value: e.target.value,
                     })
                   }
-                  className="w-full"
+                  className="w-full text-base sm:text-sm"
                 />
               ) : parameter.type === "number" ? (
                 <Input
@@ -569,7 +569,7 @@ export default function ParameterPage() {
                       value: e.target.value,
                     })
                   }
-                  className="w-full"
+                  className="w-full text-base sm:text-sm"
                 />
               ) : parameter.type === "boolean" ? (
                 <Select

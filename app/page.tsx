@@ -98,7 +98,7 @@ export default function AuthPage() {
       <Card className="w-full max-w-md p-6">
         <CardHeader className="text-center">
           <CardTitle className="text-center text-2xl font-bold mt-4">
-            {isRegister ? "Rejestracja" : "Logowanie"}
+            {isRegister ? "Register" : "Login"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -109,7 +109,7 @@ export default function AuthPage() {
                 id="email"
                 type="email"
                 name="email"
-                placeholder="Wprowadź email"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
@@ -117,12 +117,12 @@ export default function AuthPage() {
               />
             </div>
             <div className="grid gap-2 relative">
-              <Label htmlFor="password">Hasło</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Wprowadź hasło"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleInputChange}
                 required
@@ -138,12 +138,12 @@ export default function AuthPage() {
             </div>
             {isRegister && (
               <div className="grid gap-2 relative">
-                <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
-                  placeholder="Potwierdź hasło"
+                  placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   required
@@ -163,14 +163,14 @@ export default function AuthPage() {
               </div>
             )}
             <Button type="submit" className="w-full mt-4">
-              {isRegister ? "Zarejestruj się" : "Zaloguj się"}
+              {isRegister ? "Register" : "Login"}
             </Button>
           </form>
           <div className="text-center mt-4">
             <Button variant="link" onClick={handleSwitch}>
               {isRegister
-                ? "Masz już konto? Zaloguj się."
-                : "Nie masz konta? Zarejestruj się."}
+                ? "Already have an account? Login"
+                : "Don't have an account? Register"}
             </Button>
           </div>
         </CardContent>

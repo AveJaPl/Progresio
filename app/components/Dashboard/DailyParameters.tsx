@@ -252,6 +252,9 @@ export default function DailyParameters() {
                             : "Enter a value"
                         }
                         className="w-full text-base sm:text-sm"
+                        inputMode={
+                          parameter.type === "number" ? "numeric" : "text"
+                        }
                       />
                     )}
                   </CardContent>
